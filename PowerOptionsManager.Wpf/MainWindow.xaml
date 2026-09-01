@@ -1,0 +1,50 @@
+<Window x:Class="PowerOptionsManager.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:PowerOptionsManager.ViewModels"
+        xmlns:converter="clr-namespace:PowerOptionsManager.Converters"
+        mc:Ignorable="d"
+        Title="Power Options Manager" Height="600" Width="900"
+        WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <converter:BoolToVisibilityConverter x:Key="BoolToVisibility" />
+    </Window.Resources>
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Power Plans" FontSize="24" FontWeight="Bold" Margin="0,0,0,20" />
+
+        <DataGrid Grid.Row="1" ItemsSource="{Binding Plans}" AutoGenerateColumns="False"
+                  SelectedItem="{Binding SelectedPlan}" CanUserAddRows="False" CanUserDeleteRows="False"
+                  IsReadOnly="True" SelectionMode="Single">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
+                <DataGridTextColumn Header="GUID" Binding="{Binding Guid}" Width="2*" Visibility="Collapsed" />
+                <DataGridTemplateColumn Header="Status" Width="Auto">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Active" Foreground="Green" Visibility="{Binding IsActive, Converter={StaticResource BoolToVisibility}}" />
+                                <TextBlock Text="Inactive" Foreground="Gray" Visibility="{Binding IsInactive, Converter={StaticResource BoolToVisibility}}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+            <Button Content="Create" Width="80" Margin="0,0,10,0" Command="{Binding CreateCommand}" />
+            <Button Content="Edit" Width="80" Margin="0,0,10,0" Command="{Binding EditCommand}" IsEnabled="{Binding HasSelectedPlan}" />
+            <Button Content="Delete" Width="80" Margin="0,0,10,0" Command="{Binding DeleteCommand}" IsEnabled="{Binding HasSelectedPlan}" />
+            <Button Content="Set Active" Width="100" Margin="0,0,10,0" Command="{Binding SetActiveCommand}" IsEnabled="{Binding HasSelectedPlan}" />
+            <Button Content="Refresh" Width="80" Command="{Binding RefreshCommand}" />
+        </StackPanel>
+    </Grid>
+</Window>
