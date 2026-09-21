@@ -1,0 +1,9 @@
+<ContextMenu x:Class="PowerOptionsManager.Views.TrayMenu"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <MenuItem x:Name="OpenWindowMenuItem" Header="Open Power Options Manager" FontWeight="SemiBold" />
+    <Separator x:Name="TopSeparator" />
+    <MenuItem x:Name="SetActiveMenuItem" Header="Set Active" />
+    <Separator />
+    <MenuItem x:Name="ExitMenuItem" Header="Exit" />
+</ContextMenu>

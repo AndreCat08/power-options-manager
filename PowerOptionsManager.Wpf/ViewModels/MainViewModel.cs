@@ -22,11 +22,11 @@ public partial class MainViewModel : ObservableObject
     public MainViewModel(IPowerService powerService)
     {
         _powerService = powerService;
-        RefreshPlans();
+        Refresh();
     }
 
     [RelayCommand]
-    private void RefreshPlans()
+    public void Refresh()
     {
         Plans.Clear();
         var plans = _powerService.EnumeratePlans();
@@ -35,6 +35,8 @@ public partial class MainViewModel : ObservableObject
             Plans.Add(plan);
         }
     }
+
+    public void RefreshPlans() => Refresh();
 
     [RelayCommand]
     private async Task SetActiveAsync()
