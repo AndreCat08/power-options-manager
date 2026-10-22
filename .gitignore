@@ -21,9 +21,11 @@
 
 ## Logs / temp
 *.log
+*.binlog
 *.tmp
 
 ## Local settings
 appsettings.Development.json
 
+## Planning notes (local only)
 /tasks

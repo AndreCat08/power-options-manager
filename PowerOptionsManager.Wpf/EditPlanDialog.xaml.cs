@@ -1,17 +1,14 @@
-using PowerOptionsManager.Models;
-using PowerOptionsManager.ViewModels;
 using System.Windows;
+using PowerOptionsManager.ViewModels;
 
 namespace PowerOptionsManager;
 
 public partial class EditPlanDialog : Window
 {
-    public EditPlanDialogViewModel ViewModel => (EditPlanDialogViewModel)DataContext;
-
-    public EditPlanDialog(PowerPlan plan)
+    public EditPlanDialog(EditPlanDialogViewModel viewModel)
     {
         InitializeComponent();
-        var vm = new EditPlanDialogViewModel(plan);
-        DataContext = vm;
+        DataContext = viewModel;
+        viewModel.RequestClose += result => DialogResult = result;
     }
 }

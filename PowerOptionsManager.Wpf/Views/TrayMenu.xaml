@@ -1,0 +1,10 @@
+<ContextMenu x:Class="PowerOptionsManager.Views.TrayMenu"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:PowerOptionsManager.Services">
+    <MenuItem x:Name="OpenWindowMenuItem" Header="{loc:Tr Tray_Open}" FontWeight="SemiBold" />
+    <Separator x:Name="TopSeparator" />
+    <!-- One item per power plan is inserted here. -->
+    <Separator x:Name="BottomSeparator" />
+    <MenuItem x:Name="ExitMenuItem" Header="{loc:Tr Tray_Exit}" />
+</ContextMenu>

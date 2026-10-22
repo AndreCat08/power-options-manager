@@ -1,19 +1,14 @@
-using PowerOptionsManager.Models;
-using PowerOptionsManager.Services;
-using PowerOptionsManager.ViewModels;
 using System.Windows;
+using PowerOptionsManager.ViewModels;
 
 namespace PowerOptionsManager;
 
 public partial class CreatePlanDialog : Window
 {
-    public string PlanName => ((CreatePlanDialogViewModel)DataContext).PlanName;
-    public string BasePlanGuid => ((CreatePlanDialogViewModel)DataContext).BasePlanGuid;
-
-    public CreatePlanDialog()
+    public CreatePlanDialog(CreatePlanDialogViewModel viewModel)
     {
         InitializeComponent();
-        var vm = new CreatePlanDialogViewModel(new PowerService());
-        DataContext = vm;
+        DataContext = viewModel;
+        viewModel.RequestClose += result => DialogResult = result;
     }
 }

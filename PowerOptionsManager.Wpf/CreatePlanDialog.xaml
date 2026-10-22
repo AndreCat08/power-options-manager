@@ -4,34 +4,31 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:PowerOptionsManager.ViewModels"
+        xmlns:loc="clr-namespace:PowerOptionsManager.Services"
         mc:Ignorable="d"
-        Title="Create Power Plan" Height="300" Width="450"
-        WindowStartupLocation="CenterScreen"
-        ResizeMode="NoResize">
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+        d:DataContext="{d:DesignInstance Type=vm:CreatePlanDialogViewModel}"
+        Title="{loc:Tr Create_Title}" Width="460" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize" ShowInTaskbar="False"
+        FocusManager.FocusedElement="{Binding ElementName=NameBox}">
+    <StackPanel Margin="24">
+        <TextBlock Text="{loc:Tr Create_Title}" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,16" />
 
-        <TextBlock Grid.Row="0" Text="Create New Power Plan" FontSize="18" FontWeight="Bold" Margin="0,0,0,20" />
+        <Label Content="{loc:Tr Create_Name}" Target="{Binding ElementName=NameBox}" Padding="0,0,0,4" />
+        <TextBox x:Name="NameBox" Text="{Binding PlanName, UpdateSourceTrigger=PropertyChanged}"
+                 MaxLength="{x:Static vm:CreatePlanDialogViewModel.MaxNameLength}"
+                 AutomationProperties.Name="{loc:Tr Create_NameA11y}" Margin="0,0,0,16" />
 
-        <StackPanel Grid.Row="1" Margin="0,0,0,20">
-            <TextBlock Text="Plan Name" Margin="0,0,0,5" />
-            <TextBox Text="{Binding PlanName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,15" />
+        <Label Content="{loc:Tr Create_Base}" Target="{Binding ElementName=BaseBox}" Padding="0,0,0,4" />
+        <ComboBox x:Name="BaseBox" ItemsSource="{Binding BasePlans}" DisplayMemberPath="Name"
+                  SelectedItem="{Binding SelectedBasePlan}"
+                  AutomationProperties.Name="{loc:Tr Create_BaseA11y}" Margin="0,0,0,8" />
 
-            <TextBlock Text="Base Plan" Margin="0,0,0,5" />
-            <ComboBox ItemsSource="{Binding BasePlans}" 
-                      DisplayMemberPath="Name"
-                      SelectedValuePath="Guid"
-                      SelectedValue="{Binding BasePlanGuid}"
-                      Margin="0,0,0,15" />
+        <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource SystemFillColorCriticalBrush}"
+                   TextWrapping="Wrap" Margin="0,4,0,0" AutomationProperties.LiveSetting="Assertive" />
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="{loc:Tr Btn_OK}" MinWidth="96" Margin="0,0,8,0" IsDefault="True" Command="{Binding OkCommand}" />
+            <Button Content="{loc:Tr Btn_Cancel}" MinWidth="96" IsCancel="True" Command="{Binding CancelCommand}" />
         </StackPanel>
-
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="OK" Width="80" Margin="0,0,10,0" IsDefault="True" Command="{Binding OkCommand}" />
-            <Button Content="Cancel" Width="80" IsCancel="True" />
-        </StackPanel>
-    </Grid>
+    </StackPanel>
 </Window>

@@ -1,0 +1,21 @@
+PackageIdentifier: AndreCat08.PowerOptionsManager
+PackageVersion: 1.0.0
+PackageLocale: id-ID
+Publisher: AndreCat08
+PublisherUrl: https://github.com/AndreCat08
+PackageName: Power Options Manager
+PackageUrl: https://github.com/AndreCat08/power-options-manager
+License: MIT
+ShortDescription: Kelola rencana daya Windows dari system tray.
+Description: >-
+  Power Options Manager untuk melihat, membuat, mengubah, menghapus, dan
+  berpindah cepat antar rencana daya (power plan) Windows, termasuk impor/ekspor
+  dan mengembalikan rencana bawaan ke default, dengan antarmuka dua bahasa
+  (Indonesia/Inggris).
+Tags:
+  - power
+  - power-plan
+  - system-tray
+  - windows
+ManifestType: locale
+ManifestVersion: 1.6.0

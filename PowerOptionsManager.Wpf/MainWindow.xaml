@@ -4,47 +4,141 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:PowerOptionsManager.ViewModels"
+        xmlns:loc="clr-namespace:PowerOptionsManager.Services"
         xmlns:converter="clr-namespace:PowerOptionsManager.Converters"
         mc:Ignorable="d"
-        Title="Power Options Manager" Height="600" Width="900"
+        d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
+        Title="{loc:Tr App_Title}" Height="600" Width="960" MinHeight="420" MinWidth="720"
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <converter:BoolToVisibilityConverter x:Key="BoolToVisibility" />
+        <Style x:Key="ActionButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Margin" Value="0,0,8,8" />
+            <Setter Property="MinWidth" Value="96" />
+            <Setter Property="ToolTipService.ShowOnDisabled" Value="True" />
+        </Style>
     </Window.Resources>
-    <Grid Margin="20">
+
+    <Grid Margin="24,16,24,12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="Power Plans" FontSize="24" FontWeight="Bold" Margin="0,0,0,20" />
+        <!-- Header: title, version, preferences -->
+        <Grid Grid.Row="0" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel>
+                <TextBlock Text="{loc:Tr App_Title}" FontSize="24" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding VersionText}" Opacity="0.75" Margin="0,2,0,0" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <Label Content="{loc:Tr Lbl_Language}" Target="{Binding ElementName=LanguageBox}" VerticalAlignment="Center" />
+                <ComboBox x:Name="LanguageBox" MinWidth="150" Margin="4,0,16,0"
+                          ItemsSource="{Binding Languages}" DisplayMemberPath="DisplayName" SelectedValuePath="Value"
+                          SelectedValue="{Binding SelectedLanguage}"
+                          AutomationProperties.Name="{loc:Tr Lbl_Language}" />
+                <Label Content="{loc:Tr Lbl_Theme}" Target="{Binding ElementName=ThemeBox}" VerticalAlignment="Center" />
+                <ComboBox x:Name="ThemeBox" MinWidth="120" Margin="4,0,0,0"
+                          ItemsSource="{Binding ThemeOptions}" DisplayMemberPath="DisplayName" SelectedValuePath="Value"
+                          SelectedValue="{Binding SelectedTheme}"
+                          AutomationProperties.Name="{loc:Tr Lbl_Theme}" />
+            </StackPanel>
+        </Grid>
 
-        <DataGrid Grid.Row="1" ItemsSource="{Binding Plans}" AutoGenerateColumns="False"
+        <DataGrid x:Name="PlansGrid" Grid.Row="1" ItemsSource="{Binding Plans}" AutoGenerateColumns="False"
                   SelectedItem="{Binding SelectedPlan}" CanUserAddRows="False" CanUserDeleteRows="False"
-                  IsReadOnly="True" SelectionMode="Single">
+                  IsReadOnly="True" SelectionMode="Single" SelectionUnit="FullRow" HeadersVisibility="Column"
+                  GridLinesVisibility="Horizontal"
+                  Background="Transparent" RowBackground="Transparent" AlternatingRowBackground="Transparent"
+                  Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                  HorizontalGridLinesBrush="{DynamicResource DividerStrokeColorDefaultBrush}"
+                  BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+                  RowHeight="36"
+                  PreviewKeyDown="PlansGrid_PreviewKeyDown"
+                  AutomationProperties.Name="{loc:Tr A11y_PlanList}">
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow" BasedOn="{StaticResource {x:Type DataGridRow}}">
+                    <EventSetter Event="MouseDoubleClick" Handler="PlanRow_MouseDoubleClick" />
+                    <Setter Property="AutomationProperties.Name" Value="{Binding Name}" />
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                </Style>
+            </DataGrid.RowStyle>
+            <DataGrid.CellStyle>
+                <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="BorderThickness" Value="0" />
+                    <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                    <Setter Property="Padding" Value="8,0" />
+                    <Setter Property="VerticalContentAlignment" Value="Center" />
+                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=DataGridRow}}" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+                        </DataTrigger>
+                        <!-- Selection is drawn on the cells: DataGrid.RowBackground coerces the row's own Background. -->
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource ListBoxItemSelectedBackgroundThemeBrush}" />
+                            <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.CellStyle>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
-                <DataGridTextColumn Header="GUID" Binding="{Binding Guid}" Width="2*" Visibility="Collapsed" />
-                <DataGridTemplateColumn Header="Status" Width="Auto">
+                <DataGridTextColumn Header="{loc:Tr Col_Name}" Binding="{Binding Name}" Width="*">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                            <Setter Property="Margin" Value="8,0" />
+                            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTemplateColumn Header="{loc:Tr Col_Status}" Width="160">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="Active" Foreground="Green" Visibility="{Binding IsActive, Converter={StaticResource BoolToVisibility}}" />
-                                <TextBlock Text="Inactive" Foreground="Gray" Visibility="{Binding IsInactive, Converter={StaticResource BoolToVisibility}}" />
-                            </StackPanel>
+                            <Grid VerticalAlignment="Center" Margin="8,0">
+                                <TextBlock Text="{loc:Tr Status_Active}" FontWeight="SemiBold"
+                                           Visibility="{Binding IsActive, Converter={StaticResource BoolToVisibility}}" />
+                                <TextBlock Text="{loc:Tr Status_Inactive}" Opacity="0.75"
+                                           Visibility="{Binding IsInactive, Converter={StaticResource BoolToVisibility}}" />
+                            </Grid>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="{loc:Tr Col_Type}" Width="140">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Grid VerticalAlignment="Center" Margin="8,0">
+                                <TextBlock Text="{loc:Tr Type_BuiltIn}" Visibility="{Binding IsBuiltIn, Converter={StaticResource BoolToVisibility}}" />
+                                <TextBlock Text="{loc:Tr Type_Custom}" Visibility="{Binding IsCustom, Converter={StaticResource BoolToVisibility}}" />
+                            </Grid>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-            <Button Content="Create" Width="80" Margin="0,0,10,0" Command="{Binding CreateCommand}" />
-            <Button Content="Edit" Width="80" Margin="0,0,10,0" Command="{Binding EditCommand}" IsEnabled="{Binding HasSelectedPlan}" />
-            <Button Content="Delete" Width="80" Margin="0,0,10,0" Command="{Binding DeleteCommand}" IsEnabled="{Binding HasSelectedPlan}" />
-            <Button Content="Set Active" Width="100" Margin="0,0,10,0" Command="{Binding SetActiveCommand}" IsEnabled="{Binding HasSelectedPlan}" />
-            <Button Content="Refresh" Width="80" Command="{Binding RefreshCommand}" />
-        </StackPanel>
+        <WrapPanel Grid.Row="2" Margin="0,16,0,0">
+            <Button Style="{StaticResource ActionButton}" Content="{loc:Tr Btn_SetActive}" Command="{Binding SetActiveCommand}" />
+            <Button Style="{StaticResource ActionButton}" Content="{loc:Tr Btn_Create}" Command="{Binding CreateCommand}" />
+            <Button Style="{StaticResource ActionButton}" Content="{loc:Tr Btn_Edit}" Command="{Binding EditCommand}" />
+            <Button Style="{StaticResource ActionButton}" Content="{loc:Tr Btn_Delete}" Command="{Binding DeleteCommand}"
+                    ToolTip="{loc:Tr Tip_Delete}" />
+            <Button Style="{StaticResource ActionButton}" Content="{loc:Tr Btn_Import}" Command="{Binding ImportCommand}" />
+            <Button Style="{StaticResource ActionButton}" Content="{loc:Tr Btn_Export}" Command="{Binding ExportCommand}" />
+            <Button Style="{StaticResource ActionButton}" Content="{loc:Tr Btn_Reset}" Command="{Binding ResetPlanCommand}"
+                    ToolTip="{loc:Tr Tip_Reset}" />
+            <Button Style="{StaticResource ActionButton}" Content="{loc:Tr Btn_Refresh}" Command="{Binding RefreshCommand}" />
+        </WrapPanel>
+
+        <TextBlock Grid.Row="3" Text="{Binding StatusMessage}" TextWrapping="Wrap" Opacity="0.85" MinHeight="20"
+                   AutomationProperties.Name="{loc:Tr A11y_Status}" AutomationProperties.LiveSetting="Polite" />
     </Grid>
 </Window>

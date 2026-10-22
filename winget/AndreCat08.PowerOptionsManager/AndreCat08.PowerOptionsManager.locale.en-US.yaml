@@ -1,0 +1,20 @@
+PackageIdentifier: AndreCat08.PowerOptionsManager
+PackageVersion: 1.0.0
+PackageLocale: en-US
+Publisher: AndreCat08
+PublisherUrl: https://github.com/AndreCat08
+PackageName: Power Options Manager
+PackageUrl: https://github.com/AndreCat08/power-options-manager
+License: MIT
+ShortDescription: Manage Windows power plans from the system tray.
+Description: >-
+  Power Options Manager lets you view, create, edit, delete, and quick-switch
+  Windows power plans, including import/export and reset to defaults, with a
+  bilingual (English/Indonesian) UI.
+Tags:
+  - power
+  - power-plan
+  - system-tray
+  - windows
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
