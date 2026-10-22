@@ -11,6 +11,9 @@ public class PowerPlan
     public bool IsBuiltIn => BuiltInSchemes.Contains(Guid);
     public bool IsCustom => !IsBuiltIn;
 
+    /// <summary>The plan name; also what screen readers announce for list and combo box items.</summary>
+    public override string ToString() => Name;
+
     public const string BalancedGuid = "381b4222-f694-41f0-9685-ff5bb260df2e";
     public const string HighPerformanceGuid = "8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c";
     public const string PowerSaverGuid = "a1841308-3541-4fab-bc81-f71556f20b4a";
