@@ -12,7 +12,9 @@ public partial class MainWindow : Window
     private const int PBT_POWERSETTINGCHANGE = 0x8013;
     private const int DEVICE_NOTIFY_WINDOW_HANDLE = 0x00000000;
 
-    private static readonly Guid GUID_POWERSCHEME_PERSONALITY = new("245d8541-3942-4eb7-ae01-4d7d90680a64");
+    // Fires on every active-scheme change. (GUID_POWERSCHEME_PERSONALITY only fires when the
+    // plan's base type changes, so switching between two Balanced-based plans was missed.)
+    private static readonly Guid GUID_ACTIVE_POWERSCHEME = new("31f9f286-5084-42fe-b720-2b0264993763");
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern IntPtr RegisterPowerSettingNotification(IntPtr hRecipient, ref Guid PowerSettingGuid, uint Flags);
@@ -37,7 +39,7 @@ public partial class MainWindow : Window
         HwndSource.FromHwnd(handle)?.AddHook(HwndHook);
 
         // Notified whenever the active scheme changes, including from Control Panel or powercfg.
-        var guid = GUID_POWERSCHEME_PERSONALITY;
+        var guid = GUID_ACTIVE_POWERSCHEME;
         _powerNotifyHandle = RegisterPowerSettingNotification(handle, ref guid, DEVICE_NOTIFY_WINDOW_HANDLE);
     }
 
