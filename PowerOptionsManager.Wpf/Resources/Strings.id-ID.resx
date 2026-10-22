@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="App_Title" xml:space="preserve"><value>Power Options Manager</value></data>
+  <data name="Main_Version" xml:space="preserve"><value>Versi {0}</value></data>
+  <data name="Lbl_Language" xml:space="preserve"><value>_Bahasa</value></data>
+  <data name="Lbl_Theme" xml:space="preserve"><value>_Tema</value></data>
+  <data name="Lang_System" xml:space="preserve"><value>Ikuti Windows</value></data>
+  <data name="Theme_System" xml:space="preserve"><value>Ikuti Windows</value></data>
+  <data name="Theme_Light" xml:space="preserve"><value>Terang</value></data>
+  <data name="Theme_Dark" xml:space="preserve"><value>Gelap</value></data>
+  <data name="A11y_PlanList" xml:space="preserve"><value>Daftar rencana daya</value></data>
+  <data name="A11y_Status" xml:space="preserve"><value>Status</value></data>
+  <data name="Col_Name" xml:space="preserve"><value>Nama</value></data>
+  <data name="Col_Status" xml:space="preserve"><value>Status</value></data>
+  <data name="Col_Type" xml:space="preserve"><value>Jenis</value></data>
+  <data name="Status_Active" xml:space="preserve"><value>✔ Aktif</value></data>
+  <data name="Status_Inactive" xml:space="preserve"><value>Tidak aktif</value></data>
+  <data name="Type_BuiltIn" xml:space="preserve"><value>Bawaan Windows</value></data>
+  <data name="Type_Custom" xml:space="preserve"><value>Kustom</value></data>
+  <data name="Btn_SetActive" xml:space="preserve"><value>_Aktifkan</value></data>
+  <data name="Btn_Create" xml:space="preserve"><value>_Buat…</value></data>
+  <data name="Btn_Edit" xml:space="preserve"><value>_Ubah…</value></data>
+  <data name="Btn_Delete" xml:space="preserve"><value>_Hapus</value></data>
+  <data name="Btn_Import" xml:space="preserve"><value>_Impor…</value></data>
+  <data name="Btn_Export" xml:space="preserve"><value>E_kspor…</value></data>
+  <data name="Btn_Reset" xml:space="preserve"><value>_Kembalikan ke default</value></data>
+  <data name="Btn_Refresh" xml:space="preserve"><value>_Muat ulang</value></data>
+  <data name="Tip_Delete" xml:space="preserve"><value>Menghapus rencana yang dipilih. Rencana yang sedang aktif tidak bisa dihapus.</value></data>
+  <data name="Tip_Reset" xml:space="preserve"><value>Mengembalikan rencana bawaan Windows ke pengaturan default. Rencana kustom tidak punya default sehingga tidak bisa dikembalikan.</value></data>
+  <data name="Err_LoadFailed" xml:space="preserve"><value>Tidak bisa membaca rencana daya: {0}</value></data>
+  <data name="Err_Operation" xml:space="preserve"><value>Tindakan tidak bisa diselesaikan.
+
+{0}</value></data>
+  <data name="Msg_Activated" xml:space="preserve"><value>“{0}” sekarang menjadi rencana aktif.</value></data>
+  <data name="Msg_Created" xml:space="preserve"><value>“{0}” berhasil dibuat.</value></data>
+  <data name="Msg_Updated" xml:space="preserve"><value>Perubahan pada “{0}” disimpan.</value></data>
+  <data name="Msg_Deleted" xml:space="preserve"><value>“{0}” dihapus.</value></data>
+  <data name="Msg_Imported" xml:space="preserve"><value>“{0}” berhasil diimpor.</value></data>
+  <data name="Msg_Exported" xml:space="preserve"><value>“{0}” diekspor ke {1}.</value></data>
+  <data name="Msg_Reset" xml:space="preserve"><value>“{0}” dikembalikan ke pengaturan default Windows.</value></data>
+  <data name="Msg_ElevationCancelled" xml:space="preserve"><value>Akses administrator diperlukan untuk mengubah pengaturan daya ini, tetapi tidak diberikan. Tidak ada perubahan yang dibuat.</value></data>
+  <data name="Confirm_Delete" xml:space="preserve"><value>Hapus rencana daya “{0}”? Tindakan ini tidak bisa dibatalkan.</value></data>
+  <data name="Confirm_Reset" xml:space="preserve"><value>Kembalikan “{0}” ke pengaturan default Windows? Perubahan Anda pada rencana ini akan hilang.</value></data>
+  <data name="File_Filter" xml:space="preserve"><value>Rencana daya (*.pow)|*.pow|Semua file (*.*)|*.*</value></data>
+  <data name="File_ImportTitle" xml:space="preserve"><value>Impor rencana daya</value></data>
+  <data name="File_ExportTitle" xml:space="preserve"><value>Ekspor rencana daya</value></data>
+  <data name="Create_Title" xml:space="preserve"><value>Buat rencana daya</value></data>
+  <data name="Create_Name" xml:space="preserve"><value>_Nama rencana</value></data>
+  <data name="Create_NameA11y" xml:space="preserve"><value>Nama rencana</value></data>
+  <data name="Create_Base" xml:space="preserve"><value>_Salin pengaturan dari</value></data>
+  <data name="Create_BaseA11y" xml:space="preserve"><value>Salin pengaturan dari</value></data>
+  <data name="Create_DefaultName" xml:space="preserve"><value>Rencana daya saya</value></data>
+  <data name="Val_NameRequired" xml:space="preserve"><value>Masukkan nama rencana.</value></data>
+  <data name="Val_NameTooLong" xml:space="preserve"><value>Nama maksimal {0} karakter.</value></data>
+  <data name="Val_NameDuplicate" xml:space="preserve"><value>Rencana dengan nama ini sudah ada.</value></data>
+  <data name="Val_BaseRequired" xml:space="preserve"><value>Pilih rencana sebagai sumber pengaturan.</value></data>
+  <data name="Btn_OK" xml:space="preserve"><value>OK</value></data>
+  <data name="Btn_Cancel" xml:space="preserve"><value>Batal</value></data>
+  <data name="Btn_Save" xml:space="preserve"><value>_Simpan</value></data>
+  <data name="Btn_Revert" xml:space="preserve"><value>_Urungkan perubahan</value></data>
+  <data name="Tip_Revert" xml:space="preserve"><value>Mengembalikan nilai rencana seperti saat dialog dibuka.</value></data>
+  <data name="Edit_Title" xml:space="preserve"><value>Ubah “{0}”</value></data>
+  <data name="Edit_NeverHint" xml:space="preserve"><value>Waktu dalam menit; 0 berarti tidak pernah.</value></data>
+  <data name="Edit_PluggedIn" xml:space="preserve"><value>Tersambung listrik</value></data>
+  <data name="Edit_OnBattery" xml:space="preserve"><value>Dengan baterai</value></data>
+  <data name="Edit_DisplayOff" xml:space="preserve"><value>Matikan layar setelah (menit)</value></data>
+  <data name="Edit_SleepAfter" xml:space="preserve"><value>Tidurkan komputer setelah (menit)</value></data>
+  <data name="Edit_HibernateAfter" xml:space="preserve"><value>Hibernasi setelah (menit)</value></data>
+  <data name="Edit_HybridSleep" xml:space="preserve"><value>Izinkan tidur hibrida</value></data>
+  <data name="Edit_MinProcessor" xml:space="preserve"><value>Status prosesor minimum (%)</value></data>
+  <data name="Edit_MaxProcessor" xml:space="preserve"><value>Status prosesor maksimum (%)</value></data>
+  <data name="Edit_Brightness" xml:space="preserve"><value>Kecerahan layar (%)</value></data>
+  <data name="Val_Minutes" xml:space="preserve"><value>“{0}” harus berupa menit bulat dari 0 sampai {1}.</value></data>
+  <data name="Val_Percent" xml:space="preserve"><value>“{0}” harus berupa persentase bulat dari 0 sampai 100.</value></data>
+  <data name="Val_MinAboveMax" xml:space="preserve"><value>Status prosesor minimum tidak boleh lebih tinggi dari maksimum.</value></data>
+  <data name="Tray_Open" xml:space="preserve"><value>_Buka Power Options Manager</value></data>
+  <data name="Tray_Exit" xml:space="preserve"><value>_Keluar</value></data>
+  <data name="Tray_TooltipActive" xml:space="preserve"><value>Power Options Manager – {0}</value></data>
+</root>

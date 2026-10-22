@@ -1,199 +1,253 @@
+using System.Collections.ObjectModel;
+using System.Reflection;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PowerOptionsManager.Models;
 using PowerOptionsManager.Services;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Windows;
 
 namespace PowerOptionsManager.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
     private readonly IPowerService _powerService;
+    private readonly IDialogService _dialogs;
+    private readonly IAppSettingsService _settings;
+    private readonly IThemeService _theme;
+    private readonly Loc _loc = Loc.Instance;
+    private bool _applyingPreferences;
+
+    public MainViewModel(IPowerService powerService, IDialogService dialogs, IAppSettingsService settings, IThemeService theme)
+    {
+        _powerService = powerService ?? throw new ArgumentNullException(nameof(powerService));
+        _dialogs = dialogs ?? throw new ArgumentNullException(nameof(dialogs));
+        _settings = settings ?? throw new ArgumentNullException(nameof(settings));
+        _theme = theme ?? throw new ArgumentNullException(nameof(theme));
+
+        _applyingPreferences = true;
+        _selectedLanguage = _settings.Current.Language;
+        _selectedTheme = _settings.Current.Theme;
+        _applyingPreferences = false;
+
+        _loc.LanguageChanged += (_, _) => OnPropertyChanged(nameof(ThemeOptions));
+    }
+
+    /// <summary>Raised after the plan list was reloaded (the tray mirrors it).</summary>
+    public event EventHandler? PlansChanged;
+
+    public ObservableCollection<PowerPlan> Plans { get; } = [];
 
     [ObservableProperty]
-    private ObservableCollection<PowerPlan> _plans = new();
-
-    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SetActiveCommand))]
+    [NotifyCanExecuteChangedFor(nameof(EditCommand))]
+    [NotifyCanExecuteChangedFor(nameof(DeleteCommand))]
+    [NotifyCanExecuteChangedFor(nameof(ExportCommand))]
+    [NotifyCanExecuteChangedFor(nameof(ResetPlanCommand))]
     private PowerPlan? _selectedPlan;
 
-    public MainViewModel(IPowerService powerService)
+    [ObservableProperty]
+    private string _statusMessage = string.Empty;
+
+    [ObservableProperty]
+    private bool _isBusy;
+
+    [ObservableProperty]
+    private string _selectedLanguage;
+
+    [ObservableProperty]
+    private AppTheme _selectedTheme;
+
+    public string VersionText => _loc.Format("Main_Version", AppVersion);
+
+    public static string AppVersion =>
+        (Assembly.GetEntryAssembly() ?? typeof(MainViewModel).Assembly).GetName().Version?.ToString(3) ?? "1.0.0";
+
+    public IReadOnlyList<LanguageOption> Languages => _loc.Languages;
+
+    public IReadOnlyList<KeyValuePair<AppTheme, string>> ThemeOptions =>
+    [
+        new(AppTheme.System, _loc["Theme_System"]),
+        new(AppTheme.Light, _loc["Theme_Light"]),
+        new(AppTheme.Dark, _loc["Theme_Dark"]),
+    ];
+
+    partial void OnSelectedLanguageChanged(string value)
     {
-        _powerService = powerService;
-        _ = RefreshAsync();
+        if (_applyingPreferences) return;
+        _loc.SetLanguage(value);
+        _settings.Save(_settings.Current with { Language = value });
+        OnPropertyChanged(nameof(VersionText));
+    }
+
+    partial void OnSelectedThemeChanged(AppTheme value)
+    {
+        if (_applyingPreferences) return;
+        _theme.Apply(value);
+        _settings.Save(_settings.Current with { Theme = value });
     }
 
     [RelayCommand]
     public async Task RefreshAsync()
     {
-        var plans = await _powerService.GetPlansAsync();
-        Plans.Clear();
-        foreach (var plan in plans)
-        {
-            Plans.Add(plan);
-        }
-    }
-
-    public void RefreshPlans() => _ = RefreshAsync();
-
-    [RelayCommand]
-    private async Task SetActiveAsync()
-    {
-        if (SelectedPlan is null) return;
         try
         {
-            await _powerService.SetActivePlanAsync(SelectedPlan.Guid);
-            RefreshPlans();
-            MessageBox.Show($"Power plan '{SelectedPlan.Name}' activated successfully.");
+            var selectedGuid = SelectedPlan?.Guid;
+            var plans = await _powerService.GetPlansAsync();
+
+            Plans.Clear();
+            foreach (var plan in plans) Plans.Add(plan);
+
+            // Keep the selection across reloads; plan objects are recreated on every refresh.
+            SelectedPlan = Plans.FirstOrDefault(p => p.Guid == selectedGuid);
+            PlansChanged?.Invoke(this, EventArgs.Empty);
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Failed to activate power plan: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            StatusMessage = _loc.Format("Err_LoadFailed", ex.Message);
         }
     }
 
-    [RelayCommand]
-    private async Task CreateAsync()
+    private bool CanSetActive() => SelectedPlan is { IsActive: false } && !IsBusy;
+    private bool HasSelection() => SelectedPlan is not null && !IsBusy;
+    private bool CanDelete() => SelectedPlan is { IsActive: false } && !IsBusy;
+    private bool CanReset() => SelectedPlan is { IsBuiltIn: true } && !IsBusy;
+
+    partial void OnIsBusyChanged(bool value)
     {
-        var dialog = new CreatePlanDialog();
-        if (dialog.ShowDialog() == true)
-        {
-            try
-            {
-                var newPlan = await _powerService.CreatePlanAsync(dialog.PlanName, dialog.BasePlanGuid);
-                RefreshPlans();
-                MessageBox.Show($"Power plan '{newPlan.Name}' created successfully.");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Failed to create power plan: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
+        SetActiveCommand.NotifyCanExecuteChanged();
+        EditCommand.NotifyCanExecuteChanged();
+        DeleteCommand.NotifyCanExecuteChanged();
+        ExportCommand.NotifyCanExecuteChanged();
+        ResetPlanCommand.NotifyCanExecuteChanged();
+        CreateCommand.NotifyCanExecuteChanged();
+        ImportCommand.NotifyCanExecuteChanged();
     }
 
-    [RelayCommand]
-    private async Task EditAsync()
+    [RelayCommand(CanExecute = nameof(CanSetActive))]
+    private Task SetActiveAsync() => ActivateAsync(SelectedPlan!);
+
+    /// <summary>Activates a plan (used by the main window and the tray).</summary>
+    public Task ActivateAsync(PowerPlan plan) => RunAsync(async () =>
     {
-        if (SelectedPlan is null) return;
-        var dialog = new EditPlanDialog(SelectedPlan);
-        if (dialog.ShowDialog() == true)
-        {
-            try
-            {
-                await _powerService.UpdateSettingsAsync(SelectedPlan.Guid, dialog.ViewModel.ToSettings());
-                RefreshPlans();
-                MessageBox.Show($"Power plan '{SelectedPlan.Name}' updated successfully.");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Failed to update power plan: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-    }
+        await _powerService.SetActivePlanAsync(plan.Guid);
+        StatusMessage = _loc.Format("Msg_Activated", plan.Name);
+    });
 
-    [RelayCommand]
-    private async Task DeleteAsync()
+    private bool NotBusy() => !IsBusy;
+
+    [RelayCommand(CanExecute = nameof(NotBusy))]
+    private Task CreateAsync()
     {
-        if (SelectedPlan is null) return;
-        var result = MessageBox.Show(
-            $"Are you sure you want to delete '{SelectedPlan.Name}'?",
-            "Confirm Delete",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Warning
-        );
-        if (result == MessageBoxResult.Yes)
+        var request = _dialogs.ShowCreatePlan(Plans.ToList());
+        if (request is null) return Task.CompletedTask;
+
+        return RunAsync(async () =>
         {
-            try
-            {
-                await _powerService.DeletePlanAsync(SelectedPlan.Guid);
-                RefreshPlans();
-                MessageBox.Show($"Power plan '{SelectedPlan.Name}' deleted successfully.");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Failed to delete power plan: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
+            var created = await _powerService.CreatePlanAsync(request.Name, request.BasePlanGuid);
+            await RefreshAsync();
+            SelectedPlan = Plans.FirstOrDefault(p => p.Guid == created.Guid) ?? SelectedPlan;
+            StatusMessage = _loc.Format("Msg_Created", created.Name);
+        }, refresh: false);
     }
 
-    [RelayCommand]
-    private async Task ImportAsync()
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private Task EditAsync()
     {
-        var dialog = new Microsoft.Win32.OpenFileDialog
+        var plan = SelectedPlan!;
+        return RunAsync(async () =>
         {
-            Filter = "Power Plan (*.pow)|*.pow|All Files (*.*)|*.*",
-            Title = "Import Power Plan"
-        };
+            var current = await _powerService.GetSettingsAsync(plan.Guid);
+            var updated = _dialogs.ShowEditPlan(plan, current);
+            if (updated is null) return;
 
-        if (dialog.ShowDialog() == true)
-        {
-            try
-            {
-                var imported = await _powerService.ImportPlanAsync(dialog.FileName);
-                RefreshPlans();
-                MessageBox.Show($"Power plan '{imported.Name}' imported successfully.", "Import Success", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Failed to import power plan: {ex.Message}", "Import Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
+            await _powerService.UpdateSettingsAsync(plan.Guid, updated);
+            StatusMessage = _loc.Format("Msg_Updated", plan.Name);
+        });
     }
 
-    [RelayCommand]
-    private async Task ExportAsync()
+    [RelayCommand(CanExecute = nameof(CanDelete))]
+    private Task DeleteAsync()
     {
-        if (SelectedPlan is null) return;
+        var plan = SelectedPlan!;
+        if (!_dialogs.Confirm(_loc.Format("Confirm_Delete", plan.Name))) return Task.CompletedTask;
 
-        var dialog = new Microsoft.Win32.SaveFileDialog
+        return RunAsync(async () =>
         {
-            Filter = "Power Plan (*.pow)|*.pow",
-            Title = "Export Power Plan",
-            FileName = $"{SelectedPlan.Name}.pow"
-        };
-
-        if (dialog.ShowDialog() == true)
-        {
-            try
-            {
-                await _powerService.ExportPlanAsync(SelectedPlan.Guid, dialog.FileName);
-                MessageBox.Show($"Power plan '{SelectedPlan.Name}' exported successfully.", "Export Success", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Failed to export power plan: {ex.Message}", "Export Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
+            await _powerService.DeletePlanAsync(plan.Guid);
+            StatusMessage = _loc.Format("Msg_Deleted", plan.Name);
+        });
     }
 
-    [RelayCommand]
-    private async Task ResetPlanAsync()
+    [RelayCommand(CanExecute = nameof(NotBusy))]
+    private Task ImportAsync()
     {
-        if (SelectedPlan is null) return;
+        var path = _dialogs.PickImportFile();
+        if (path is null) return Task.CompletedTask;
 
-        var result = MessageBox.Show(
-            $"Are you sure you want to restore power plans to default settings?",
-            "Confirm Reset to Default",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Warning
-        );
-
-        if (result == MessageBoxResult.Yes)
+        return RunAsync(async () =>
         {
-            try
-            {
-                await _powerService.ResetPlanToDefaultAsync(SelectedPlan.Guid);
-                RefreshPlans();
-                MessageBox.Show("Power plan settings restored to default.", "Reset Success", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Failed to reset power plans: {ex.Message}", "Reset Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
+            var imported = await _powerService.ImportPlanAsync(path);
+            await RefreshAsync();
+            SelectedPlan = Plans.FirstOrDefault(p => p.Guid == imported.Guid) ?? SelectedPlan;
+            StatusMessage = _loc.Format("Msg_Imported", imported.Name);
+        }, refresh: false);
     }
 
-    public bool HasSelectedPlan => SelectedPlan is not null;
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private Task ExportAsync()
+    {
+        var plan = SelectedPlan!;
+        var path = _dialogs.PickExportFile(SafeFileName(plan.Name) + ".pow");
+        if (path is null) return Task.CompletedTask;
+
+        return RunAsync(async () =>
+        {
+            await _powerService.ExportPlanAsync(plan.Guid, path);
+            StatusMessage = _loc.Format("Msg_Exported", plan.Name, path);
+        }, refresh: false);
+    }
+
+    [RelayCommand(CanExecute = nameof(CanReset))]
+    private Task ResetPlanAsync()
+    {
+        var plan = SelectedPlan!;
+        if (!_dialogs.Confirm(_loc.Format("Confirm_Reset", plan.Name))) return Task.CompletedTask;
+
+        return RunAsync(async () =>
+        {
+            await _powerService.ResetPlanToDefaultAsync(plan.Guid);
+            StatusMessage = _loc.Format("Msg_Reset", plan.Name);
+        });
+    }
+
+    /// <summary>Runs one operation: busy flag, error reporting, then (by default) a refresh.</summary>
+    private async Task RunAsync(Func<Task> operation, bool refresh = true)
+    {
+        IsBusy = true;
+        try
+        {
+            await operation();
+        }
+        catch (PowercfgException ex) when (ex.Kind == PowercfgErrorKind.ElevationCancelled)
+        {
+            StatusMessage = _loc["Msg_ElevationCancelled"];
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = string.Empty;
+            _dialogs.ShowError(_loc.Format("Err_Operation", ex.Message));
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+
+        if (refresh) await RefreshAsync();
+    }
+
+    private static string SafeFileName(string name)
+    {
+        var invalid = System.IO.Path.GetInvalidFileNameChars();
+        var cleaned = new string(name.Select(c => invalid.Contains(c) ? '_' : c).ToArray()).Trim();
+        return cleaned.Length == 0 ? "power-plan" : cleaned;
+    }
 }

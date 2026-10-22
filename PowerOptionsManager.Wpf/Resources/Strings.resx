@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="App_Title" xml:space="preserve"><value>Power Options Manager</value></data>
+  <data name="Main_Version" xml:space="preserve"><value>Version {0}</value></data>
+  <data name="Lbl_Language" xml:space="preserve"><value>_Language</value></data>
+  <data name="Lbl_Theme" xml:space="preserve"><value>_Theme</value></data>
+  <data name="Lang_System" xml:space="preserve"><value>Windows default</value></data>
+  <data name="Theme_System" xml:space="preserve"><value>Windows default</value></data>
+  <data name="Theme_Light" xml:space="preserve"><value>Light</value></data>
+  <data name="Theme_Dark" xml:space="preserve"><value>Dark</value></data>
+  <data name="A11y_PlanList" xml:space="preserve"><value>Power plans</value></data>
+  <data name="A11y_Status" xml:space="preserve"><value>Status</value></data>
+  <data name="Col_Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Col_Status" xml:space="preserve"><value>Status</value></data>
+  <data name="Col_Type" xml:space="preserve"><value>Type</value></data>
+  <data name="Status_Active" xml:space="preserve"><value>✔ Active</value></data>
+  <data name="Status_Inactive" xml:space="preserve"><value>Inactive</value></data>
+  <data name="Type_BuiltIn" xml:space="preserve"><value>Built-in</value></data>
+  <data name="Type_Custom" xml:space="preserve"><value>Custom</value></data>
+  <data name="Btn_SetActive" xml:space="preserve"><value>Set _active</value></data>
+  <data name="Btn_Create" xml:space="preserve"><value>_Create…</value></data>
+  <data name="Btn_Edit" xml:space="preserve"><value>_Edit…</value></data>
+  <data name="Btn_Delete" xml:space="preserve"><value>_Delete</value></data>
+  <data name="Btn_Import" xml:space="preserve"><value>_Import…</value></data>
+  <data name="Btn_Export" xml:space="preserve"><value>E_xport…</value></data>
+  <data name="Btn_Reset" xml:space="preserve"><value>_Reset to default</value></data>
+  <data name="Btn_Refresh" xml:space="preserve"><value>Re_fresh</value></data>
+  <data name="Tip_Delete" xml:space="preserve"><value>Deletes the selected plan. The active plan cannot be deleted.</value></data>
+  <data name="Tip_Reset" xml:space="preserve"><value>Restores a built-in Windows plan to its default settings. Custom plans have no defaults and cannot be reset.</value></data>
+  <data name="Err_LoadFailed" xml:space="preserve"><value>Could not read the power plans: {0}</value></data>
+  <data name="Err_Operation" xml:space="preserve"><value>The action could not be completed.
+
+{0}</value></data>
+  <data name="Msg_Activated" xml:space="preserve"><value>“{0}” is now the active plan.</value></data>
+  <data name="Msg_Created" xml:space="preserve"><value>Created “{0}”.</value></data>
+  <data name="Msg_Updated" xml:space="preserve"><value>Saved changes to “{0}”.</value></data>
+  <data name="Msg_Deleted" xml:space="preserve"><value>Deleted “{0}”.</value></data>
+  <data name="Msg_Imported" xml:space="preserve"><value>Imported “{0}”.</value></data>
+  <data name="Msg_Exported" xml:space="preserve"><value>Exported “{0}” to {1}.</value></data>
+  <data name="Msg_Reset" xml:space="preserve"><value>Restored “{0}” to its Windows defaults.</value></data>
+  <data name="Msg_ElevationCancelled" xml:space="preserve"><value>Administrator access is required to change this power setting, and it was not granted. No changes were made.</value></data>
+  <data name="Confirm_Delete" xml:space="preserve"><value>Delete the power plan “{0}”? This cannot be undone.</value></data>
+  <data name="Confirm_Reset" xml:space="preserve"><value>Restore “{0}” to its Windows default settings? Your changes to this plan will be lost.</value></data>
+  <data name="File_Filter" xml:space="preserve"><value>Power plan (*.pow)|*.pow|All files (*.*)|*.*</value></data>
+  <data name="File_ImportTitle" xml:space="preserve"><value>Import power plan</value></data>
+  <data name="File_ExportTitle" xml:space="preserve"><value>Export power plan</value></data>
+  <data name="Create_Title" xml:space="preserve"><value>Create power plan</value></data>
+  <data name="Create_Name" xml:space="preserve"><value>Plan _name</value></data>
+  <data name="Create_NameA11y" xml:space="preserve"><value>Plan name</value></data>
+  <data name="Create_Base" xml:space="preserve"><value>_Copy settings from</value></data>
+  <data name="Create_BaseA11y" xml:space="preserve"><value>Copy settings from</value></data>
+  <data name="Create_DefaultName" xml:space="preserve"><value>My power plan</value></data>
+  <data name="Val_NameRequired" xml:space="preserve"><value>Enter a name for the plan.</value></data>
+  <data name="Val_NameTooLong" xml:space="preserve"><value>The name can be at most {0} characters long.</value></data>
+  <data name="Val_NameDuplicate" xml:space="preserve"><value>A plan with this name already exists.</value></data>
+  <data name="Val_BaseRequired" xml:space="preserve"><value>Choose a plan to copy the settings from.</value></data>
+  <data name="Btn_OK" xml:space="preserve"><value>OK</value></data>
+  <data name="Btn_Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Btn_Save" xml:space="preserve"><value>_Save</value></data>
+  <data name="Btn_Revert" xml:space="preserve"><value>_Undo changes</value></data>
+  <data name="Tip_Revert" xml:space="preserve"><value>Puts back the values this plan had when the dialog opened.</value></data>
+  <data name="Edit_Title" xml:space="preserve"><value>Edit “{0}”</value></data>
+  <data name="Edit_NeverHint" xml:space="preserve"><value>Times are in minutes; 0 means never.</value></data>
+  <data name="Edit_PluggedIn" xml:space="preserve"><value>Plugged in</value></data>
+  <data name="Edit_OnBattery" xml:space="preserve"><value>On battery</value></data>
+  <data name="Edit_DisplayOff" xml:space="preserve"><value>Turn off the display after (minutes)</value></data>
+  <data name="Edit_SleepAfter" xml:space="preserve"><value>Put the computer to sleep after (minutes)</value></data>
+  <data name="Edit_HibernateAfter" xml:space="preserve"><value>Hibernate after (minutes)</value></data>
+  <data name="Edit_HybridSleep" xml:space="preserve"><value>Allow hybrid sleep</value></data>
+  <data name="Edit_MinProcessor" xml:space="preserve"><value>Minimum processor state (%)</value></data>
+  <data name="Edit_MaxProcessor" xml:space="preserve"><value>Maximum processor state (%)</value></data>
+  <data name="Edit_Brightness" xml:space="preserve"><value>Display brightness (%)</value></data>
+  <data name="Val_Minutes" xml:space="preserve"><value>“{0}” needs whole minutes from 0 to {1}.</value></data>
+  <data name="Val_Percent" xml:space="preserve"><value>“{0}” needs a whole percentage from 0 to 100.</value></data>
+  <data name="Val_MinAboveMax" xml:space="preserve"><value>The minimum processor state cannot be higher than the maximum.</value></data>
+  <data name="Tray_Open" xml:space="preserve"><value>_Open Power Options Manager</value></data>
+  <data name="Tray_Exit" xml:space="preserve"><value>E_xit</value></data>
+  <data name="Tray_TooltipActive" xml:space="preserve"><value>Power Options Manager – {0}</value></data>
+</root>

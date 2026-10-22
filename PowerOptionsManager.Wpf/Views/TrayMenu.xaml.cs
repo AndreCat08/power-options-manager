@@ -6,11 +6,7 @@ namespace PowerOptionsManager.Views;
 
 public partial class TrayMenu : ContextMenu
 {
-    public MenuItem SetActiveItem => SetActiveMenuItem;
-    public MenuItem OpenWindowItem => OpenWindowMenuItem;
-    public MenuItem ExitItem => ExitMenuItem;
-
-    private readonly List<Control> _dynamicPlanItems = new();
+    private readonly List<MenuItem> _planItems = [];
 
     public event Action? OpenWindowRequested;
     public event Action? ExitRequested;
@@ -20,47 +16,30 @@ public partial class TrayMenu : ContextMenu
     {
         InitializeComponent();
 
-        OpenWindowMenuItem.Click += (s, e) => OpenWindowRequested?.Invoke();
-        ExitMenuItem.Click += (s, e) => ExitRequested?.Invoke();
+        OpenWindowMenuItem.Click += (_, _) => OpenWindowRequested?.Invoke();
+        ExitMenuItem.Click += (_, _) => ExitRequested?.Invoke();
     }
 
-    public void UpdatePlans(IReadOnlyList<PowerPlan> plans)
+    public IReadOnlyList<MenuItem> PlanItems => _planItems;
+
+    /// <summary>Lists each plan once, with a check mark on the active plan.</summary>
+    public void UpdatePlans(IEnumerable<PowerPlan> plans)
     {
-        // Remove previous dynamic plan items from top-level menu
-        foreach (var item in _dynamicPlanItems)
-        {
-            Items.Remove(item);
-        }
-        _dynamicPlanItems.Clear();
+        foreach (var item in _planItems) Items.Remove(item);
+        _planItems.Clear();
 
-        SetActiveMenuItem.Items.Clear();
-
-        int insertIndex = Items.IndexOf(TopSeparator) + 1;
-
+        var insertIndex = Items.IndexOf(TopSeparator) + 1;
         foreach (var plan in plans)
         {
-            // Top-level plan menu item
-            var planItem = new MenuItem
-            {
-                Header = plan.Name,
-                IsCheckable = true,
-                IsChecked = plan.IsActive
-            };
-            var capturedPlan = plan;
-            planItem.Click += (s, e) => PlanSelected?.Invoke(capturedPlan);
+            // Not checkable: the check reflects Windows' state and moves only after a successful switch.
+            var item = new MenuItem { Header = plan.Name, IsCheckable = false, IsChecked = plan.IsActive };
+            var captured = plan;
+            item.Click += (_, _) => PlanSelected?.Invoke(captured);
 
-            Items.Insert(insertIndex++, planItem);
-            _dynamicPlanItems.Add(planItem);
-
-            // Item in "Set Active" submenu
-            var subMenuItem = new MenuItem
-            {
-                Header = plan.Name,
-                IsCheckable = true,
-                IsChecked = plan.IsActive
-            };
-            subMenuItem.Click += (s, e) => PlanSelected?.Invoke(capturedPlan);
-            SetActiveMenuItem.Items.Add(subMenuItem);
+            Items.Insert(insertIndex++, item);
+            _planItems.Add(item);
         }
+
+        BottomSeparator.Visibility = _planItems.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
     }
 }

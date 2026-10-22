@@ -1,91 +1,70 @@
-using PowerOptionsManager.Models;
-using PowerOptionsManager.Services;
-using PowerOptionsManager.Views;
-using System.Collections.Generic;
-using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
-using Xunit;
+using PowerOptionsManager.Models;
+using PowerOptionsManager.Views;
 
 namespace PowerOptionsManager.Tests;
 
 public class TrayMenuTests
 {
-    [Fact]
-    public void UpdatePlans_PopulatesMenuItemsAndSetActiveSubmenu()
-    {
-        var thread = new System.Threading.Thread(() =>
-        {
-            var menu = new TrayMenu();
-            var plans = new List<PowerPlan>
-            {
-                new() { Name = "Balanced", Guid = "381b4222-f694-41f0-9685-ff5bb260df2e", IsActive = true },
-                new() { Name = "High Performance", Guid = "8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c", IsActive = false }
-            };
-
-            menu.UpdatePlans(plans);
-
-            // Verify "Set Active" submenu contains the plans
-            Assert.Equal(2, menu.SetActiveItem.Items.Count);
-
-            var subItem1 = menu.SetActiveItem.Items[0] as MenuItem;
-            var subItem2 = menu.SetActiveItem.Items[1] as MenuItem;
-
-            Assert.NotNull(subItem1);
-            Assert.NotNull(subItem2);
-            Assert.Equal("Balanced", subItem1.Header);
-            Assert.True(subItem1.IsChecked);
-            Assert.Equal("High Performance", subItem2.Header);
-            Assert.False(subItem2.IsChecked);
-
-            // Verify top-level items contains the plans
-            var planItems = menu.Items.OfType<MenuItem>().Where(i => i.Header?.ToString() == "Balanced" || i.Header?.ToString() == "High Performance").ToList();
-            Assert.Equal(2, planItems.Count);
-        });
-
-        thread.SetApartmentState(System.Threading.ApartmentState.STA);
-        thread.Start();
-        thread.Join();
-    }
+    private static List<PowerPlan> Plans() =>
+    [
+        new() { Name = "Balanced", Guid = TestPlans.Balanced, IsActive = true },
+        new() { Name = "High performance", Guid = TestPlans.HighPerformance },
+    ];
 
     [Fact]
-    public void UpdatePlans_FiresPlanSelectedEvent_OnClick()
+    public void UpdatePlans_ListsEachPlanOnce_WithActiveChecked() => Sta.Run(() =>
     {
-        var thread = new System.Threading.Thread(() =>
-        {
-            var menu = new TrayMenu();
-            var plan = new PowerPlan { Name = "Balanced", Guid = "test-guid", IsActive = false };
-            menu.UpdatePlans(new List<PowerPlan> { plan });
+        var menu = new TrayMenu();
 
-            PowerPlan? selectedPlan = null;
-            menu.PlanSelected += p => selectedPlan = p;
+        menu.UpdatePlans(Plans());
 
-            var subItem = menu.SetActiveItem.Items[0] as MenuItem;
-            Assert.NotNull(subItem);
-            subItem.RaiseEvent(new System.Windows.RoutedEventArgs(MenuItem.ClickEvent));
-
-            Assert.NotNull(selectedPlan);
-            Assert.Equal("test-guid", selectedPlan.Guid);
-        });
-
-        thread.SetApartmentState(System.Threading.ApartmentState.STA);
-        thread.Start();
-        thread.Join();
-    }
+        Assert.Equal(2, menu.PlanItems.Count);
+        Assert.Equal("Balanced", menu.PlanItems[0].Header);
+        Assert.True(menu.PlanItems[0].IsChecked);
+        Assert.False(menu.PlanItems[1].IsChecked);
+        // Each plan appears exactly once anywhere in the menu (no duplicate submenu).
+        Assert.Single(menu.Items.OfType<MenuItem>(), i => Equals(i.Header, "Balanced"));
+        Assert.All(menu.Items.OfType<MenuItem>(), i => Assert.Empty(i.Items));
+    });
 
     [Fact]
-    public void EditPlanDialogViewModel_ResetToDefault_RestoresDefaults()
+    public void UpdatePlans_CalledAgain_ReplacesItems() => Sta.Run(() =>
     {
-        var plan = new PowerPlan { Name = "Balanced", Guid = "test-guid" };
-        var vm = new PowerOptionsManager.ViewModels.EditPlanDialogViewModel(plan);
+        var menu = new TrayMenu();
+        menu.UpdatePlans(Plans());
 
-        vm.DisplayTimeout = 60;
-        vm.SleepTimeout = 60;
-        vm.MinProcessorStateAc = 100;
+        menu.UpdatePlans([new PowerPlan { Name = "Only", Guid = TestPlans.Custom, IsActive = true }]);
 
-        vm.ResetToDefaultCommand.Execute(null);
+        Assert.Equal("Only", Assert.Single(menu.PlanItems).Header);
+        Assert.Single(menu.Items.OfType<MenuItem>(), i => Equals(i.Header, "Only"));
+    });
 
-        Assert.Equal(10, vm.DisplayTimeout);
-        Assert.Equal(15, vm.SleepTimeout);
-        Assert.Equal(5, vm.MinProcessorStateAc);
-    }
+    [Fact]
+    public void ClickingPlan_RaisesPlanSelected_WithoutTogglingCheck() => Sta.Run(() =>
+    {
+        var menu = new TrayMenu();
+        menu.UpdatePlans(Plans());
+        PowerPlan? selected = null;
+        menu.PlanSelected += p => selected = p;
+
+        var item = menu.PlanItems[1];
+        item.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
+
+        Assert.Equal(TestPlans.HighPerformance, selected?.Guid);
+        Assert.False(item.IsCheckable);
+        Assert.False(item.IsChecked); // moves only after the switch succeeds and the list reloads
+    });
+
+    [Fact]
+    public void NoPlans_HidesExtraSeparator() => Sta.Run(() =>
+    {
+        var menu = new TrayMenu();
+
+        menu.UpdatePlans([]);
+
+        Assert.Empty(menu.PlanItems);
+        Assert.Single(menu.Items.OfType<Separator>(), s => s.Visibility == Visibility.Visible);
+    });
 }

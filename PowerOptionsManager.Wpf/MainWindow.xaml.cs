@@ -1,8 +1,7 @@
-using System;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Interop;
-using PowerOptionsManager.Services;
 using PowerOptionsManager.ViewModels;
 
 namespace PowerOptionsManager;
@@ -22,26 +21,22 @@ public partial class MainWindow : Window
     private static extern bool UnregisterPowerSettingNotification(IntPtr Handle);
 
     private IntPtr _powerNotifyHandle;
-    private TrayService? _trayService;
 
     public MainWindow()
     {
         InitializeComponent();
     }
 
-    public void AttachTrayService(TrayService trayService)
-    {
-        _trayService = trayService;
-    }
+    private MainViewModel? ViewModel => DataContext as MainViewModel;
 
     protected override void OnSourceInitialized(EventArgs e)
     {
         base.OnSourceInitialized(e);
 
         var handle = new WindowInteropHelper(this).Handle;
-        var source = HwndSource.FromHwnd(handle);
-        source?.AddHook(HwndHook);
+        HwndSource.FromHwnd(handle)?.AddHook(HwndHook);
 
+        // Notified whenever the active scheme changes, including from Control Panel or powercfg.
         var guid = GUID_POWERSCHEME_PERSONALITY;
         _powerNotifyHandle = RegisterPowerSettingNotification(handle, ref guid, DEVICE_NOTIFY_WINDOW_HANDLE);
     }
@@ -60,12 +55,34 @@ public partial class MainWindow : Window
     {
         if (msg == WM_POWERBROADCAST && (int)wParam == PBT_POWERSETTINGCHANGE)
         {
-            _trayService?.RefreshMenu();
-            if (DataContext is MainViewModel vm)
-            {
-                vm.RefreshCommand.Execute(null);
-            }
+            ViewModel?.RefreshCommand.Execute(null);
         }
         return IntPtr.Zero;
+    }
+
+    private void PlanRow_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (ViewModel?.SetActiveCommand is { } command && command.CanExecute(null))
+        {
+            command.Execute(null);
+            e.Handled = true;
+        }
+    }
+
+    private void PlansGrid_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (ViewModel is not { } vm) return;
+
+        // Enter activates the selected plan, Delete deletes it (instead of DataGrid's defaults).
+        var command = e.Key switch
+        {
+            Key.Enter => vm.SetActiveCommand,
+            Key.Delete => vm.DeleteCommand,
+            _ => null,
+        };
+        if (command is null) return;
+
+        if (command.CanExecute(null)) command.Execute(null);
+        e.Handled = true;
     }
 }

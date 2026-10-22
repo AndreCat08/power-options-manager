@@ -3,72 +3,84 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:PowerOptionsManager.ViewModels"
+        xmlns:loc="clr-namespace:PowerOptionsManager.Services"
         xmlns:converter="clr-namespace:PowerOptionsManager.Converters"
         mc:Ignorable="d"
-        Title="Edit Power Plan" Height="500" Width="500"
-        WindowStartupLocation="CenterScreen"
-        ResizeMode="NoResize">
+        d:DataContext="{d:DesignInstance Type=vm:EditPlanDialogViewModel}"
+        Title="{Binding Title}" Width="640" SizeToContent="Height" MaxHeight="760"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize" ShowInTaskbar="False">
     <Window.Resources>
         <converter:BoolToVisibilityConverter x:Key="BoolToVisibility" />
     </Window.Resources>
-    <Grid Margin="20">
+    <Grid Margin="24">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="Edit Power Plan Settings" FontSize="18" FontWeight="Bold" Margin="0,0,0,20" />
+        <TextBlock Grid.Row="0" Text="{Binding Title}" FontSize="20" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+        <TextBlock Grid.Row="1" Text="{loc:Tr Edit_NeverHint}" Opacity="0.75" Margin="0,4,0,12" />
 
-        <ScrollViewer Grid.Row="1" Margin="0,0,0,20">
-            <StackPanel>
-                <GroupBox Header="Display" Margin="0,0,0,10">
-                    <StackPanel>
-                        <TextBlock Text="Turn off display after (minutes)" Margin="0,0,0,5" />
-                        <ComboBox ItemsSource="{Binding TimeoutOptions}" SelectedItem="{Binding DisplayTimeout}" Margin="0,0,0,10" />
-                    </StackPanel>
-                </GroupBox>
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Focusable="False">
+            <Grid Grid.IsSharedSizeScope="True">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="130" SharedSizeGroup="Ac" />
+                        <ColumnDefinition Width="130" SharedSizeGroup="Dc" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="1" Text="{loc:Tr Edit_PluggedIn}" FontWeight="SemiBold" Margin="8,0" />
+                    <TextBlock Grid.Column="2" Text="{loc:Tr Edit_OnBattery}" FontWeight="SemiBold" Margin="8,0" />
+                </Grid>
+                <ItemsControl Grid.Row="1" ItemsSource="{Binding Rows}" Focusable="False">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:SettingRowViewModel}">
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition SharedSizeGroup="Ac" />
+                                    <ColumnDefinition SharedSizeGroup="Dc" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{Binding Label}" VerticalAlignment="Center" TextWrapping="Wrap" Margin="0,0,8,0" />
 
-                <GroupBox Header="Sleep" Margin="0,0,0,10">
-                    <StackPanel>
-                        <TextBlock Text="Put the computer to sleep after (minutes)" Margin="0,0,0,5" />
-                        <ComboBox ItemsSource="{Binding TimeoutOptions}" SelectedItem="{Binding SleepTimeout}" Margin="0,0,0,10" />
-                        <CheckBox Content="Allow hybrid sleep" IsChecked="{Binding HybridSleep}" Margin="0,0,0,10" />
-                        <CheckBox Content="Hibernate after (minutes)" IsChecked="{Binding HibernateEnabled}" Margin="0,0,0,5" />
-                        <ComboBox ItemsSource="{Binding TimeoutOptions}" SelectedItem="{Binding HibernateTimeout}" Margin="0,0,0,10" Visibility="{Binding HibernateEnabled, Converter={StaticResource BoolToVisibility}}" />
-                    </StackPanel>
-                </GroupBox>
+                                <TextBox Grid.Column="1" Margin="8,0" Text="{Binding AcText, UpdateSourceTrigger=PropertyChanged}"
+                                         Visibility="{Binding IsNumeric, Converter={StaticResource BoolToVisibility}}"
+                                         AutomationProperties.Name="{Binding AcAutomationName}" />
+                                <TextBox Grid.Column="2" Margin="8,0" Text="{Binding DcText, UpdateSourceTrigger=PropertyChanged}"
+                                         Visibility="{Binding IsNumeric, Converter={StaticResource BoolToVisibility}}"
+                                         AutomationProperties.Name="{Binding DcAutomationName}" />
 
-                <GroupBox Header="Processor" Margin="0,0,0,10">
-                    <StackPanel>
-                        <TextBlock Text="Minimum processor state (%) - AC" Margin="0,0,0,5" />
-                        <Slider Value="{Binding MinProcessorStateAc}" Minimum="0" Maximum="100" SmallChange="5" Margin="0,0,0,10" />
-                        <TextBlock Text="{Binding MinProcessorStateAc, StringFormat='Minimum: {0}%'}" Margin="0,0,0,5" />
-                        
-                        <TextBlock Text="Minimum processor state (%) - DC" Margin="0,0,0,5" />
-                        <Slider Value="{Binding MinProcessorStateDc}" Minimum="0" Maximum="100" SmallChange="5" Margin="0,0,0,10" />
-                        <TextBlock Text="{Binding MinProcessorStateDc, StringFormat='Minimum: {0}%'}" Margin="0,0,0,5" />
-                    </StackPanel>
-                </GroupBox>
-
-                <GroupBox Header="Brightness" Margin="0,0,0,10">
-                    <StackPanel>
-                        <TextBlock Text="Display brightness - AC" Margin="0,0,0,5" />
-                        <Slider Value="{Binding BrightnessAc}" Minimum="0" Maximum="100" SmallChange="5" Margin="0,0,0,10" />
-                        <TextBlock Text="{Binding BrightnessAc, StringFormat='Brightness: {0}%'}" Margin="0,0,0,5" />
-                        
-                        <TextBlock Text="Display brightness - DC" Margin="0,0,0,5" />
-                        <Slider Value="{Binding BrightnessDc}" Minimum="0" Maximum="100" SmallChange="5" Margin="0,0,0,10" />
-                        <TextBlock Text="{Binding BrightnessDc, StringFormat='Brightness: {0}%'}" Margin="0,0,0,5" />
-                    </StackPanel>
-                </GroupBox>
-            </StackPanel>
+                                <CheckBox Grid.Column="1" Margin="8,0" VerticalAlignment="Center" IsChecked="{Binding AcOn}"
+                                          Visibility="{Binding IsToggle, Converter={StaticResource BoolToVisibility}}"
+                                          AutomationProperties.Name="{Binding AcAutomationName}" />
+                                <CheckBox Grid.Column="2" Margin="8,0" VerticalAlignment="Center" IsChecked="{Binding DcOn}"
+                                          Visibility="{Binding IsToggle, Converter={StaticResource BoolToVisibility}}"
+                                          AutomationProperties.Name="{Binding DcAutomationName}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
         </ScrollViewer>
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="Reset to Default" Margin="0,0,10,0" Padding="10,4" Command="{Binding ResetToDefaultCommand}" />
-            <Button Content="OK" Width="80" Margin="0,0,10,0" IsDefault="True" Command="{Binding OkCommand}" />
-            <Button Content="Cancel" Width="80" IsCancel="True" />
-        </StackPanel>
+        <TextBlock Grid.Row="3" Text="{Binding ErrorMessage}" Foreground="{DynamicResource SystemFillColorCriticalBrush}"
+                   TextWrapping="Wrap" Margin="0,8,0,0" AutomationProperties.LiveSetting="Assertive" />
+
+        <Grid Grid.Row="4" Margin="0,16,0,0">
+            <Button Content="{loc:Tr Btn_Revert}" MinWidth="96" HorizontalAlignment="Left" Command="{Binding RevertCommand}"
+                    ToolTip="{loc:Tr Tip_Revert}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="{loc:Tr Btn_Save}" MinWidth="96" Margin="0,0,8,0" IsDefault="True" Command="{Binding SaveCommand}" />
+                <Button Content="{loc:Tr Btn_Cancel}" MinWidth="96" IsCancel="True" Command="{Binding CancelCommand}" />
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>
