@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/PowerOptionsManager.Wpf/">
+    <Project Path="PowerOptionsManager.Wpf/PowerOptionsManagerWpf.csproj" />
+  </Folder>
+  <Project Path="PowerOptionsManager.Tests/PowerOptionsManager.Tests.csproj" />
+</Solution>
