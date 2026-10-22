@@ -42,9 +42,16 @@ public partial class MainViewModel : ObservableObject
     private async Task SetActiveAsync()
     {
         if (SelectedPlan is null) return;
-        await _powerService.SetActivePlanAsync(SelectedPlan.Guid);
-        RefreshPlans();
-        MessageBox.Show($"Power plan '{SelectedPlan.Name}' activated successfully.");
+        try
+        {
+            await _powerService.SetActivePlanAsync(SelectedPlan.Guid);
+            RefreshPlans();
+            MessageBox.Show($"Power plan '{SelectedPlan.Name}' activated successfully.");
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to activate power plan: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
     [RelayCommand]
@@ -53,9 +60,16 @@ public partial class MainViewModel : ObservableObject
         var dialog = new CreatePlanDialog();
         if (dialog.ShowDialog() == true)
         {
-            var newPlan = await _powerService.CreatePlanAsync(dialog.PlanName, dialog.BasePlanGuid);
-            RefreshPlans();
-            MessageBox.Show($"Power plan '{newPlan.Name}' created successfully.");
+            try
+            {
+                var newPlan = await _powerService.CreatePlanAsync(dialog.PlanName, dialog.BasePlanGuid);
+                RefreshPlans();
+                MessageBox.Show($"Power plan '{newPlan.Name}' created successfully.");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to create power plan: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 
@@ -66,9 +80,16 @@ public partial class MainViewModel : ObservableObject
         var dialog = new EditPlanDialog(SelectedPlan);
         if (dialog.ShowDialog() == true)
         {
-            await _powerService.EditPlanAsync(SelectedPlan.Guid, dialog.ViewModel.Settings);
-            RefreshPlans();
-            MessageBox.Show($"Power plan '{SelectedPlan.Name}' updated successfully.");
+            try
+            {
+                await _powerService.EditPlanAsync(SelectedPlan.Guid, dialog.ViewModel.Settings);
+                RefreshPlans();
+                MessageBox.Show($"Power plan '{SelectedPlan.Name}' updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to update power plan: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 
@@ -84,9 +105,93 @@ public partial class MainViewModel : ObservableObject
         );
         if (result == MessageBoxResult.Yes)
         {
-            await _powerService.DeletePlanAsync(SelectedPlan.Guid);
-            RefreshPlans();
-            MessageBox.Show($"Power plan '{SelectedPlan.Name}' deleted successfully.");
+            try
+            {
+                await _powerService.DeletePlanAsync(SelectedPlan.Guid);
+                RefreshPlans();
+                MessageBox.Show($"Power plan '{SelectedPlan.Name}' deleted successfully.");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to delete power plan: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+    }
+
+    [RelayCommand]
+    private async Task ImportAsync()
+    {
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Filter = "Power Plan (*.pow)|*.pow|All Files (*.*)|*.*",
+            Title = "Import Power Plan"
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            try
+            {
+                var imported = await _powerService.ImportPlanAsync(dialog.FileName);
+                RefreshPlans();
+                MessageBox.Show($"Power plan '{imported.Name}' imported successfully.", "Import Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to import power plan: {ex.Message}", "Import Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+    }
+
+    [RelayCommand]
+    private async Task ExportAsync()
+    {
+        if (SelectedPlan is null) return;
+
+        var dialog = new Microsoft.Win32.SaveFileDialog
+        {
+            Filter = "Power Plan (*.pow)|*.pow",
+            Title = "Export Power Plan",
+            FileName = $"{SelectedPlan.Name}.pow"
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            try
+            {
+                await _powerService.ExportPlanAsync(SelectedPlan.Guid, dialog.FileName);
+                MessageBox.Show($"Power plan '{SelectedPlan.Name}' exported successfully.", "Export Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to export power plan: {ex.Message}", "Export Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+    }
+
+    [RelayCommand]
+    private async Task ResetPlanAsync()
+    {
+        if (SelectedPlan is null) return;
+
+        var result = MessageBox.Show(
+            $"Are you sure you want to restore power plans to default settings?",
+            "Confirm Reset to Default",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning
+        );
+
+        if (result == MessageBoxResult.Yes)
+        {
+            try
+            {
+                await _powerService.ResetPlanToDefaultAsync(SelectedPlan.Guid);
+                RefreshPlans();
+                MessageBox.Show("Power plan settings restored to default.", "Reset Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to reset power plans: {ex.Message}", "Reset Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 

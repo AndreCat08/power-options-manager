@@ -60,6 +60,12 @@ public partial class EditPlanDialogViewModel : ObservableObject
     public Dictionary<string, object> Settings => _settings;
 
     [RelayCommand]
+    private void ResetToDefault()
+    {
+        InitializeSettings();
+    }
+
+    [RelayCommand]
     private void Ok()
     {
         _settings["DisplayTimeout"] = DisplayTimeout;

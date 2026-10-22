@@ -94,34 +94,18 @@ public class TrayService : IDisposable
 
         try
         {
+            // PowerService elevates via UAC internally if the unelevated call is denied.
             await _powerService.SetActivePlanAsync(plan.Guid);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // Fallback with UAC elevation if required
-            try
-            {
-                var psi = new ProcessStartInfo
-                {
-                    FileName = "powercfg",
-                    Arguments = $"/setactive {plan.Guid}",
-                    UseShellExecute = true,
-                    Verb = "runas",
-                    CreateNoWindow = true
-                };
-                var process = Process.Start(psi);
-                process?.WaitForExit();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    $"Failed to activate power plan '{plan.Name}': {ex.Message}",
-                    "Power Options Manager",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error
-                );
-                return;
-            }
+            MessageBox.Show(
+                $"Failed to activate power plan '{plan.Name}': {ex.Message}",
+                "Power Options Manager",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
+            return;
         }
 
         RefreshMenu();

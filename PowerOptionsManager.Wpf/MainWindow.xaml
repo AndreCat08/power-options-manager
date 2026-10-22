@@ -22,16 +22,17 @@
 
         <DataGrid Grid.Row="1" ItemsSource="{Binding Plans}" AutoGenerateColumns="False"
                   SelectedItem="{Binding SelectedPlan}" CanUserAddRows="False" CanUserDeleteRows="False"
-                  IsReadOnly="True" SelectionMode="Single">
+                  IsReadOnly="True" SelectionMode="Single"
+                  AutomationProperties.Name="Power Plans List">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
                 <DataGridTextColumn Header="GUID" Binding="{Binding Guid}" Width="2*" Visibility="Collapsed" />
                 <DataGridTemplateColumn Header="Status" Width="Auto">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="Active" Foreground="Green" Visibility="{Binding IsActive, Converter={StaticResource BoolToVisibility}}" />
-                                <TextBlock Text="Inactive" Foreground="Gray" Visibility="{Binding IsInactive, Converter={StaticResource BoolToVisibility}}" />
+                            <StackPanel Orientation="Horizontal" AutomationProperties.Name="Plan Status">
+                                <TextBlock Text="Active" Foreground="#0E7A0D" FontWeight="SemiBold" Visibility="{Binding IsActive, Converter={StaticResource BoolToVisibility}}" />
+                                <TextBlock Text="Inactive" Foreground="#5A5A5A" Visibility="{Binding IsInactive, Converter={StaticResource BoolToVisibility}}" />
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
@@ -40,6 +41,9 @@
         </DataGrid>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+            <Button Content="Import..." Width="80" Margin="0,0,10,0" Command="{Binding ImportCommand}" />
+            <Button Content="Export..." Width="80" Margin="0,0,10,0" Command="{Binding ExportCommand}" IsEnabled="{Binding HasSelectedPlan}" />
+            <Button Content="Reset Default" Margin="0,0,10,0" Padding="10,4" Command="{Binding ResetPlanCommand}" IsEnabled="{Binding HasSelectedPlan}" />
             <Button Content="Create" Width="80" Margin="0,0,10,0" Command="{Binding CreateCommand}" />
             <Button Content="Edit" Width="80" Margin="0,0,10,0" Command="{Binding EditCommand}" IsEnabled="{Binding HasSelectedPlan}" />
             <Button Content="Delete" Width="80" Margin="0,0,10,0" Command="{Binding DeleteCommand}" IsEnabled="{Binding HasSelectedPlan}" />

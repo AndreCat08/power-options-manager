@@ -91,6 +91,31 @@ public class PowerService : IPowerService
         return plans.FirstOrDefault(p => p.Guid == guid) ?? new PowerPlan();
     }
 
+    public async Task<PowerPlan> ImportPlanAsync(string filePath, string? targetGuid = null)
+    {
+        var args = string.IsNullOrEmpty(targetGuid)
+            ? $"/import \"{filePath}\""
+            : $"/import \"{filePath}\" {targetGuid}";
+        
+        var output = RunPowercfgCommand(args);
+        var guidMatch = System.Text.RegularExpressions.Regex.Match(output, @"([a-f0-9-]{36})");
+        var importedGuid = guidMatch.Success ? guidMatch.Value : (targetGuid ?? string.Empty);
+
+        var plans = EnumeratePlans();
+        return plans.FirstOrDefault(p => string.Equals(p.Guid, importedGuid, StringComparison.OrdinalIgnoreCase))
+               ?? new PowerPlan { Guid = importedGuid, Name = System.IO.Path.GetFileNameWithoutExtension(filePath) };
+    }
+
+    public async Task ExportPlanAsync(string planGuid, string filePath)
+    {
+        RunPowercfgCommand($"/export \"{filePath}\" {planGuid}");
+    }
+
+    public async Task ResetPlanToDefaultAsync(string planGuid)
+    {
+        RunPowercfgCommand($"/restoredefaultschemes");
+    }
+
     private (string Category, string Value) ParseSettingKey(string key)
     {
         return key switch
@@ -129,9 +154,54 @@ public class PowerService : IPowerService
 
         if (!string.IsNullOrEmpty(error))
         {
+            if (IsAccessDenied(error))
+            {
+                return RunPowercfgCommandElevated(args);
+            }
+
             throw new InvalidOperationException($"Powercfg error: {error}");
         }
 
         return output;
+    }
+
+    private static bool IsAccessDenied(string error) =>
+        error.Contains("access is denied", StringComparison.OrdinalIgnoreCase) ||
+        error.Contains("akses ditolak", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Retries a powercfg command elevated via UAC (Verb=runas). Used when the
+    /// unelevated call fails with access denied (create/edit/delete/set-active
+    /// all route through here). No output is captured back from the elevated
+    /// process since UseShellExecute is required for the UAC prompt.
+    /// </summary>
+    private string RunPowercfgCommandElevated(string args)
+    {
+        try
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = PowercfgPath,
+                Arguments = args,
+                UseShellExecute = true,
+                Verb = "runas",
+                CreateNoWindow = true
+            };
+
+            using var process = Process.Start(startInfo);
+            process?.WaitForExit();
+
+            if (process != null && process.ExitCode != 0)
+            {
+                throw new InvalidOperationException("Powercfg failed even with elevation.");
+            }
+
+            return string.Empty;
+        }
+        catch (System.ComponentModel.Win32Exception ex)
+        {
+            // ERROR_CANCELLED: user declined the UAC prompt
+            throw new InvalidOperationException("Administrator permission is required for this action and was not granted.", ex);
+        }
     }
 }

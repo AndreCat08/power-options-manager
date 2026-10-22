@@ -71,4 +71,21 @@ public class TrayMenuTests
         thread.Start();
         thread.Join();
     }
+
+    [Fact]
+    public void EditPlanDialogViewModel_ResetToDefault_RestoresDefaults()
+    {
+        var plan = new PowerPlan { Name = "Balanced", Guid = "test-guid" };
+        var vm = new PowerOptionsManager.ViewModels.EditPlanDialogViewModel(plan);
+
+        vm.DisplayTimeout = 60;
+        vm.SleepTimeout = 60;
+        vm.MinProcessorStateAc = 100;
+
+        vm.ResetToDefaultCommand.Execute(null);
+
+        Assert.Equal(10, vm.DisplayTimeout);
+        Assert.Equal(15, vm.SleepTimeout);
+        Assert.Equal(5, vm.MinProcessorStateAc);
+    }
 }

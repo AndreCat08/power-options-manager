@@ -11,4 +11,7 @@ public interface IPowerService
     Task DeletePlanAsync(string planGuid);
     Task SetActivePlanAsync(string planGuid);
     Task<PowerPlan> GetActivePlanAsync();
+    Task<PowerPlan> ImportPlanAsync(string filePath, string? targetGuid = null);
+    Task ExportPlanAsync(string planGuid, string filePath);
+    Task ResetPlanToDefaultAsync(string planGuid);
 }
