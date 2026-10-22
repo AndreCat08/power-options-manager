@@ -6,9 +6,6 @@ using System.Windows.Markup;
 
 namespace PowerOptionsManager.Services;
 
-/// <summary>A selectable UI language. An empty <see cref="Code"/> means "follow Windows".</summary>
-public sealed record LanguageOption(string Code, string DisplayName);
-
 /// <summary>
 /// UI strings from Resources/Strings.resx (English) and Strings.id-ID.resx (Indonesian).
 /// The indexer raises PropertyChanged("Item[]") on a language switch, so every
@@ -36,13 +33,6 @@ public sealed class Loc : INotifyPropertyChanged
     /// <summary>The language code the user picked ("" = follow Windows).</summary>
     public string SelectedCode { get; private set; } = string.Empty;
 
-    public IReadOnlyList<LanguageOption> Languages =>
-    [
-        new(string.Empty, this["Lang_System"]),
-        new("en-US", "English"),
-        new("id-ID", "Bahasa Indonesia"),
-    ];
-
     public string this[string key] => Resources.GetString(key, Culture) ?? $"[{key}]";
 
     public string Format(string key, params object?[] args) => string.Format(Culture, this[key], args);
@@ -61,7 +51,6 @@ public sealed class Loc : INotifyPropertyChanged
 
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Item[]"));
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Culture)));
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Languages)));
         LanguageChanged?.Invoke(this, EventArgs.Empty);
     }
 

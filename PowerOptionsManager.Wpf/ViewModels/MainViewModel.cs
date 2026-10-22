@@ -28,7 +28,12 @@ public partial class MainViewModel : ObservableObject
         _selectedTheme = _settings.Current.Theme;
         _applyingPreferences = false;
 
-        _loc.LanguageChanged += (_, _) => OnPropertyChanged(nameof(ThemeOptions));
+        _loc.LanguageChanged += (_, _) =>
+        {
+            foreach (var option in Languages) option.RefreshLabel();
+            foreach (var option in ThemeOptions) option.RefreshLabel();
+            OnPropertyChanged(nameof(VersionText));
+        };
     }
 
     /// <summary>Raised after the plan list was reloaded (the tray mirrors it).</summary>
@@ -61,13 +66,19 @@ public partial class MainViewModel : ObservableObject
     public static string AppVersion =>
         (Assembly.GetEntryAssembly() ?? typeof(MainViewModel).Assembly).GetName().Version?.ToString(3) ?? "1.0.0";
 
-    public IReadOnlyList<LanguageOption> Languages => _loc.Languages;
-
-    public IReadOnlyList<KeyValuePair<AppTheme, string>> ThemeOptions =>
+    // Fixed item instances: only their labels change on a language switch, so selection is kept.
+    public IReadOnlyList<OptionItem<string>> Languages { get; } =
     [
-        new(AppTheme.System, _loc["Theme_System"]),
-        new(AppTheme.Light, _loc["Theme_Light"]),
-        new(AppTheme.Dark, _loc["Theme_Dark"]),
+        new(string.Empty, () => Loc.Instance["Lang_System"]),
+        new("en-US", () => "English"),
+        new("id-ID", () => "Bahasa Indonesia"),
+    ];
+
+    public IReadOnlyList<OptionItem<AppTheme>> ThemeOptions { get; } =
+    [
+        new(AppTheme.System, () => Loc.Instance["Theme_System"]),
+        new(AppTheme.Light, () => Loc.Instance["Theme_Light"]),
+        new(AppTheme.Dark, () => Loc.Instance["Theme_Dark"]),
     ];
 
     partial void OnSelectedLanguageChanged(string value)

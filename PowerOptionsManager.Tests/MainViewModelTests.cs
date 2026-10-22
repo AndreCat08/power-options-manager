@@ -248,12 +248,16 @@ public class MainViewModelTests
     public async Task ChangingLanguage_SwitchesStringsAndSaves()
     {
         var vm = await CreateAsync();
+        var darkOption = vm.ThemeOptions.Single(t => t.Value == AppTheme.Dark);
 
         vm.SelectedLanguage = "id-ID";
 
+        // Same item instance with a new label, so the combo box keeps its selection.
+        Assert.Same(darkOption, vm.ThemeOptions.Single(t => t.Value == AppTheme.Dark));
+        Assert.Equal("Gelap", darkOption.ToString());
         Assert.Equal("id-ID", _settings.Current.Language);
         Assert.Equal("Versi " + MainViewModel.AppVersion, vm.VersionText);
-        Assert.Equal("Gelap", vm.ThemeOptions.Single(t => t.Key == AppTheme.Dark).Value);
+        Assert.Equal("Gelap", vm.ThemeOptions.Single(t => t.Value == AppTheme.Dark).DisplayName);
 
         vm.SelectedLanguage = "en-US";
         Assert.Equal("Version " + MainViewModel.AppVersion, vm.VersionText);
