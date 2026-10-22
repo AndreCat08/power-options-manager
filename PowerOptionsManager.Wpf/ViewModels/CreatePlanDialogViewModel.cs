@@ -23,14 +23,14 @@ public partial class CreatePlanDialogViewModel : ObservableObject
     public CreatePlanDialogViewModel(IPowerService powerService)
     {
         _powerService = powerService;
-        LoadBasePlans();
+        _ = LoadBasePlansAsync();
     }
 
     [RelayCommand]
-    private void LoadBasePlans()
+    private async Task LoadBasePlansAsync()
     {
         BasePlans.Clear();
-        var plans = _powerService.EnumeratePlans();
+        var plans = await _powerService.GetPlansAsync();
         foreach (var plan in plans)
         {
             BasePlans.Add(plan);

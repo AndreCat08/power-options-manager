@@ -59,6 +59,15 @@ public partial class EditPlanDialogViewModel : ObservableObject
 
     public Dictionary<string, object> Settings => _settings;
 
+    /// <summary>Interim mapping until the dialog is rebuilt (minutes → seconds, AC/DC pairs).</summary>
+    public PlanSettings ToSettings() => new()
+    {
+        DisplayOffSeconds = new AcDc((uint)DisplayTimeout * 60, (uint)DisplayTimeout * 60),
+        SleepSeconds = new AcDc((uint)SleepTimeout * 60, (uint)SleepTimeout * 60),
+        MinProcessorPercent = new AcDc((uint)MinProcessorStateAc, (uint)MinProcessorStateDc),
+        BrightnessPercent = new AcDc((uint)BrightnessAc, (uint)BrightnessDc),
+    };
+
     [RelayCommand]
     private void ResetToDefault()
     {

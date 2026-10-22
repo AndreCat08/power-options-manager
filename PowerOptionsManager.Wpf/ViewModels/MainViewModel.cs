@@ -22,21 +22,21 @@ public partial class MainViewModel : ObservableObject
     public MainViewModel(IPowerService powerService)
     {
         _powerService = powerService;
-        Refresh();
+        _ = RefreshAsync();
     }
 
     [RelayCommand]
-    public void Refresh()
+    public async Task RefreshAsync()
     {
+        var plans = await _powerService.GetPlansAsync();
         Plans.Clear();
-        var plans = _powerService.EnumeratePlans();
         foreach (var plan in plans)
         {
             Plans.Add(plan);
         }
     }
 
-    public void RefreshPlans() => Refresh();
+    public void RefreshPlans() => _ = RefreshAsync();
 
     [RelayCommand]
     private async Task SetActiveAsync()
@@ -82,7 +82,7 @@ public partial class MainViewModel : ObservableObject
         {
             try
             {
-                await _powerService.EditPlanAsync(SelectedPlan.Guid, dialog.ViewModel.Settings);
+                await _powerService.UpdateSettingsAsync(SelectedPlan.Guid, dialog.ViewModel.ToSettings());
                 RefreshPlans();
                 MessageBox.Show($"Power plan '{SelectedPlan.Name}' updated successfully.");
             }

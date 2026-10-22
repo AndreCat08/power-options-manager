@@ -69,11 +69,11 @@ public class TrayService : IDisposable
         _mainWindow.Activate();
     }
 
-    public void RefreshMenu()
+    public async void RefreshMenu()
     {
         try
         {
-            var plans = _powerService.EnumeratePlans();
+            var plans = await _powerService.GetPlansAsync();
             _trayMenu.UpdatePlans(plans);
 
             var active = plans.FirstOrDefault(p => p.IsActive);
