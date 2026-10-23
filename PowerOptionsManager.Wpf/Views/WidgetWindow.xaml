@@ -1,0 +1,130 @@
+<Window x:Class="PowerOptionsManager.Views.WidgetWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:PowerOptionsManager.ViewModels"
+        xmlns:loc="clr-namespace:PowerOptionsManager.Services"
+        xmlns:converter="clr-namespace:PowerOptionsManager.Converters"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=vm:WidgetViewModel}"
+        Title="{loc:Tr A11y_Widget}"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ResizeMode="NoResize" SizeToContent="WidthAndHeight"
+        ShowInTaskbar="False" ShowActivated="False" WindowStartupLocation="Manual"
+        Topmost="{Binding IsTopmost}"
+        AutomationProperties.Name="{loc:Tr A11y_Widget}">
+    <Window.Resources>
+        <converter:BoolToVisibilityConverter x:Key="BoolToVisibility" />
+        <FontFamily x:Key="IconFont">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
+        <Style x:Key="HeaderIconButton" TargetType="ButtonBase">
+            <Setter Property="Width" Value="28" />
+            <Setter Property="Height" Value="28" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="2,0,0,0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FontFamily" Value="{StaticResource IconFont}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ButtonBase">
+                        <Border x:Name="Bg" Background="{TemplateBinding Background}" CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <!-- Margin leaves room for the drop shadow inside the transparent window. -->
+    <Border x:Name="Card" Margin="12" Padding="12,8,12,12" CornerRadius="8" MinWidth="220" MaxWidth="320"
+            Background="{DynamicResource SolidBackgroundFillColorBaseBrush}"
+            BorderBrush="{DynamicResource SurfaceStrokeColorDefaultBrush}" BorderThickness="1"
+            TextElement.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+            MouseLeftButtonDown="Card_MouseLeftButtonDown">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="16" ShadowDepth="2" Opacity="0.3" />
+        </Border.Effect>
+        <Border.ContextMenu>
+            <ContextMenu>
+                <MenuItem Header="{loc:Tr Widget_AlwaysOnTop}" IsCheckable="True" IsChecked="{Binding IsTopmost}" />
+                <MenuItem Header="{loc:Tr Tray_Open}" Command="{Binding OpenMainWindowCommand}" />
+                <Separator />
+                <MenuItem Header="{loc:Tr Widget_Hide}" Command="{Binding HideCommand}" />
+            </ContextMenu>
+        </Border.ContextMenu>
+
+        <StackPanel>
+            <!-- Header: drag anywhere outside the buttons. -->
+            <DockPanel Background="Transparent" Cursor="SizeAll">
+                <Button DockPanel.Dock="Right" Style="{StaticResource HeaderIconButton}" Content="&#xE711;"
+                        Command="{Binding HideCommand}" ToolTip="{loc:Tr Tip_WidgetHide}"
+                        AutomationProperties.Name="{loc:Tr Tip_WidgetHide}" />
+                <ToggleButton DockPanel.Dock="Right" Style="{StaticResource HeaderIconButton}"
+                              IsChecked="{Binding IsTopmost}" ToolTip="{loc:Tr Tip_WidgetPin}"
+                              AutomationProperties.Name="{loc:Tr Tip_WidgetPin}">
+                    <!-- Filled accent pin while always-on-top, outline pin otherwise. -->
+                    <TextBlock>
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Text" Value="&#xE718;" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsTopmost}" Value="True">
+                                        <Setter Property="Text" Value="&#xE840;" />
+                                        <Setter Property="Foreground" Value="{DynamicResource AccentFillColorDefaultBrush}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </ToggleButton>
+                <TextBlock VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" FontSize="12">
+                    <Run Text="&#xE945;" FontFamily="{StaticResource IconFont}" Foreground="{DynamicResource AccentFillColorDefaultBrush}" />
+                    <Run Text="{loc:Tr Widget_Title}" />
+                </TextBlock>
+            </DockPanel>
+
+            <TextBlock Text="{Binding ActivePlanName}" FontSize="16" FontWeight="SemiBold" Margin="0,4,0,10"
+                       TextTrimming="CharacterEllipsis" ToolTip="{Binding ActivePlanName}"
+                       AutomationProperties.Name="{Binding ActivePlanA11y}" />
+
+            <ItemsControl ItemsSource="{Binding Plans}" Focusable="False">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="0,0,0,4">
+                            <!-- Active plan: highlighted, not clickable. -->
+                            <Border CornerRadius="4" Padding="10,6" Background="{DynamicResource AccentFillColorDefaultBrush}"
+                                    Visibility="{Binding IsActive, Converter={StaticResource BoolToVisibility}}">
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Right" Text="&#xE73E;" FontFamily="{StaticResource IconFont}"
+                                               VerticalAlignment="Center" Margin="8,0,0,0"
+                                               Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
+                                    <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
+                                </DockPanel>
+                            </Border>
+                            <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="10,6"
+                                    Visibility="{Binding IsInactive, Converter={StaticResource BoolToVisibility}}"
+                                    Command="{Binding DataContext.ActivatePlanCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    CommandParameter="{Binding}"
+                                    ToolTip="{loc:Tr Tip_WidgetActivate}"
+                                    AutomationProperties.Name="{Binding Name}">
+                                <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                            </Button>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </Border>
+</Window>

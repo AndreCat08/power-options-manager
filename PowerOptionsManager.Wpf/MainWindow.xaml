@@ -48,6 +48,9 @@
                           ItemsSource="{Binding ThemeOptions}" DisplayMemberPath="DisplayName" SelectedValuePath="Value"
                           SelectedValue="{Binding SelectedTheme}"
                           AutomationProperties.Name="{loc:Tr Lbl_Theme}" />
+                <!-- DataContext is the WidgetViewModel (set in App). -->
+                <CheckBox x:Name="WidgetToggle" Content="{loc:Tr Lbl_ShowWidget}" IsChecked="{Binding IsVisible}"
+                          VerticalAlignment="Center" Margin="16,0,0,0" />
             </StackPanel>
         </Grid>
 

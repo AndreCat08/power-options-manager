@@ -16,6 +16,16 @@ public sealed record AppSettings
     public string Language { get; init; } = string.Empty;
 
     public AppTheme Theme { get; init; } = AppTheme.System;
+
+    /// <summary>Whether the floating desktop widget is shown.</summary>
+    public bool ShowWidget { get; init; }
+
+    public bool WidgetTopmost { get; init; } = true;
+
+    /// <summary>Last widget position in DIPs; null until the user first moves it.</summary>
+    public double? WidgetLeft { get; init; }
+
+    public double? WidgetTop { get; init; }
 }
 
 public interface IAppSettingsService

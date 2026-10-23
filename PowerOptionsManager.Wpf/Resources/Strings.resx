@@ -80,4 +80,15 @@
   <data name="Tray_Open" xml:space="preserve"><value>_Open Power Options Manager</value></data>
   <data name="Tray_Exit" xml:space="preserve"><value>E_xit</value></data>
   <data name="Tray_TooltipActive" xml:space="preserve"><value>Power Options Manager – {0}</value></data>
+  <data name="Tray_ShowWidget" xml:space="preserve"><value>Show desktop _widget</value></data>
+  <data name="Lbl_ShowWidget" xml:space="preserve"><value>Desktop _widget</value></data>
+  <data name="Widget_Title" xml:space="preserve"><value>Power plan</value></data>
+  <data name="Widget_NoActivePlan" xml:space="preserve"><value>No active plan</value></data>
+  <data name="Widget_AlwaysOnTop" xml:space="preserve"><value>Always on _top</value></data>
+  <data name="Widget_Hide" xml:space="preserve"><value>_Hide widget</value></data>
+  <data name="Tip_WidgetPin" xml:space="preserve"><value>Always on top</value></data>
+  <data name="Tip_WidgetHide" xml:space="preserve"><value>Hide widget</value></data>
+  <data name="Tip_WidgetActivate" xml:space="preserve"><value>Switch to this plan</value></data>
+  <data name="A11y_Widget" xml:space="preserve"><value>Power plan widget</value></data>
+  <data name="A11y_WidgetActivePlan" xml:space="preserve"><value>Active plan: {0}</value></data>
 </root>

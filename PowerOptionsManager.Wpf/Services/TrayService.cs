@@ -12,20 +12,23 @@ public sealed class TrayService : IDisposable
 {
     private readonly MainWindow _mainWindow;
     private readonly MainViewModel _viewModel;
+    private readonly WidgetViewModel _widget;
     private readonly TaskbarIcon _taskbarIcon;
     private readonly TrayMenu _trayMenu;
     private readonly Loc _loc = Loc.Instance;
     private bool _isExiting;
     private bool _disposed;
 
-    public TrayService(MainWindow mainWindow, MainViewModel viewModel)
+    public TrayService(MainWindow mainWindow, MainViewModel viewModel, WidgetViewModel widget)
     {
         _mainWindow = mainWindow ?? throw new ArgumentNullException(nameof(mainWindow));
         _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
+        _widget = widget ?? throw new ArgumentNullException(nameof(widget));
 
         _trayMenu = new TrayMenu();
         _trayMenu.OpenWindowRequested += ShowMainWindow;
         _trayMenu.ExitRequested += ExitApplication;
+        _trayMenu.WidgetToggleRequested += () => _widget.IsVisible = !_widget.IsVisible;
         _trayMenu.PlanSelected += plan => _ = _viewModel.ActivateAsync(plan);
         _trayMenu.Opened += (_, _) => _viewModel.RefreshCommand.Execute(null);
 
@@ -44,6 +47,12 @@ public sealed class TrayService : IDisposable
 
         _viewModel.PlansChanged += (_, _) => UpdateFromViewModel();
         _loc.LanguageChanged += (_, _) => UpdateFromViewModel();
+        _widget.OpenMainWindowRequested += (_, _) => ShowMainWindow();
+        _widget.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(WidgetViewModel.IsVisible)) _trayMenu.SetWidgetVisible(_widget.IsVisible);
+        };
+        _trayMenu.SetWidgetVisible(_widget.IsVisible);
 
         // Closing the window hides it to the tray; Exit in the tray menu quits.
         _mainWindow.Closing += (_, e) =>
