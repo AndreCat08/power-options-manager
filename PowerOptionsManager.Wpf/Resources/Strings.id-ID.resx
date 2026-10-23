@@ -80,4 +80,15 @@
   <data name="Tray_Open" xml:space="preserve"><value>_Buka Power Options Manager</value></data>
   <data name="Tray_Exit" xml:space="preserve"><value>_Keluar</value></data>
   <data name="Tray_TooltipActive" xml:space="preserve"><value>Power Options Manager – {0}</value></data>
+  <data name="Tray_ShowWidget" xml:space="preserve"><value>Tampilkan _widget desktop</value></data>
+  <data name="Lbl_ShowWidget" xml:space="preserve"><value>_Widget desktop</value></data>
+  <data name="Widget_Title" xml:space="preserve"><value>Rencana daya</value></data>
+  <data name="Widget_NoActivePlan" xml:space="preserve"><value>Tidak ada rencana aktif</value></data>
+  <data name="Widget_AlwaysOnTop" xml:space="preserve"><value>Selalu di _atas</value></data>
+  <data name="Widget_Hide" xml:space="preserve"><value>_Sembunyikan widget</value></data>
+  <data name="Tip_WidgetPin" xml:space="preserve"><value>Selalu di atas</value></data>
+  <data name="Tip_WidgetHide" xml:space="preserve"><value>Sembunyikan widget</value></data>
+  <data name="Tip_WidgetActivate" xml:space="preserve"><value>Beralih ke rencana ini</value></data>
+  <data name="A11y_Widget" xml:space="preserve"><value>Widget rencana daya</value></data>
+  <data name="A11y_WidgetActivePlan" xml:space="preserve"><value>Rencana aktif: {0}</value></data>
 </root>

@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:loc="clr-namespace:PowerOptionsManager.Services">
     <MenuItem x:Name="OpenWindowMenuItem" Header="{loc:Tr Tray_Open}" FontWeight="SemiBold" />
+    <MenuItem x:Name="WidgetMenuItem" Header="{loc:Tr Tray_ShowWidget}" />
     <Separator x:Name="TopSeparator" />
     <!-- One item per power plan is inserted here. -->
     <Separator x:Name="BottomSeparator" />

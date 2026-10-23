@@ -10,6 +10,7 @@ public partial class TrayMenu : ContextMenu
 
     public event Action? OpenWindowRequested;
     public event Action? ExitRequested;
+    public event Action? WidgetToggleRequested;
     public event Action<PowerPlan>? PlanSelected;
 
     public TrayMenu()
@@ -18,9 +19,15 @@ public partial class TrayMenu : ContextMenu
 
         OpenWindowMenuItem.Click += (_, _) => OpenWindowRequested?.Invoke();
         ExitMenuItem.Click += (_, _) => ExitRequested?.Invoke();
+        WidgetMenuItem.Click += (_, _) => WidgetToggleRequested?.Invoke();
     }
 
     public IReadOnlyList<MenuItem> PlanItems => _planItems;
+
+    public MenuItem WidgetItem => WidgetMenuItem;
+
+    /// <summary>Check mark on "Show desktop widget" mirrors whether the widget is visible.</summary>
+    public void SetWidgetVisible(bool visible) => WidgetMenuItem.IsChecked = visible;
 
     /// <summary>Lists each plan once, with a check mark on the active plan.</summary>
     public void UpdatePlans(IEnumerable<PowerPlan> plans)

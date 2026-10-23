@@ -2,6 +2,7 @@ using System.Threading;
 using System.Windows;
 using PowerOptionsManager.Services;
 using PowerOptionsManager.ViewModels;
+using PowerOptionsManager.Views;
 
 namespace PowerOptionsManager;
 
@@ -43,7 +44,12 @@ public partial class App : Application
         var viewModel = new MainViewModel(new PowerService(), new WpfDialogService(), settings, theme);
         window.DataContext = viewModel;
 
-        _trayService = new TrayService(window, viewModel);
+        var widgetViewModel = new WidgetViewModel(viewModel, settings);
+        var widget = new WidgetWindow(widgetViewModel);
+        window.WidgetToggle.DataContext = widgetViewModel;
+        window.Closed += (_, _) => widget.CloseForExit(); // the main window only really closes on Exit
+
+        _trayService = new TrayService(window, viewModel, widgetViewModel);
 
         _showEvent = new EventWaitHandle(false, EventResetMode.AutoReset, ShowEventName);
         _showWait = ThreadPool.RegisterWaitForSingleObject(_showEvent,
@@ -52,6 +58,7 @@ public partial class App : Application
 
         window.Show();
         _ = viewModel.RefreshAsync();
+        widget.SyncVisibility();
     }
 
     protected override void OnExit(ExitEventArgs e)
